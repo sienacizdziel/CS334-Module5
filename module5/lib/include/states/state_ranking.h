@@ -3,7 +3,7 @@
 
 #include "states/state_interface.h"
 
-using namespace cs334;
+namespace cs334 {
 
 class RankingState : GameState {
  public:
@@ -12,6 +12,8 @@ class RankingState : GameState {
   void run() override;
 
  private:
-}
+};
+
+};
 
 #endif /* STATE_RANKING_H */

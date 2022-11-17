@@ -1,11 +1,12 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include "config.h"
 #include "states/state_interface.h"
+#include "client_espnow.h"
 #include <vector>
 
-using namespace cs334;
-
+namespace cs334 {
 
 class Game {
 public:
@@ -20,6 +21,8 @@ private:
 
   // states of the game to iterate through
   std::vector<GameState> m_states;
-}
+};
+
+};
 
 #endif /* GAME_H */

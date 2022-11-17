@@ -2,10 +2,13 @@
 #define CLIENT_ESPNOW_H
 
 #include <stdbool.h>
+#include <map>
+#include <string>
+
 #include "freeRTOS/task.h"
 #include "config.h"
 
-using namespace cs334;
+namespace cs334 {
 
 class ESPNOWClient {
 public: // METHODS
@@ -54,6 +57,8 @@ public: // MEMBERS
 
 private: // MEMBERS
   TaskHandle_t m_scan_task_handle = NULL;
-}
+};
+
+};
 
 #endif /* CLIENT_ESPNOW_H */

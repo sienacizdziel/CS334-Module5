@@ -1,6 +1,6 @@
 #include "client_espnow.h"
 
-using namespace cs334;
+namespace cs334 {
 
 /**
  * @brief Construct a new ESPNOWClient::ESPNOWClient object
@@ -60,3 +60,5 @@ void ESPNOWClient::scan_task(void *pvParameter) {
 void ESPNOWClient::send(const char* message, uint8_t* mac_address) {
   
 }
+
+};

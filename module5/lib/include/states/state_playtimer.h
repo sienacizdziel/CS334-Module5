@@ -3,7 +3,7 @@
 
 #include "states/state_interface.h"
 
-using namespace cs334;
+namespace cs334 {
 
 class PlayTimerState: GameState {
 public:
@@ -12,8 +12,9 @@ public:
   void run() override;
 private:
   
-}
+};
 
+};
 
 
 #endif /* STATE_PLAYTIMER_H */

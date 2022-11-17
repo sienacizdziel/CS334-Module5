@@ -3,9 +3,9 @@
 cs334::Game *game;
 
 void setup() {
-  game = new Game();
+  game = new cs334::Game();
 }
 
 void loop() {
-  game.loop();
+  game->loop();
 }

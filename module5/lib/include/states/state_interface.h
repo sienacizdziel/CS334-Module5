@@ -1,9 +1,9 @@
-#ifndef GAME_H
-#define GAME_H
+#ifndef STATE_INTERFACE_H
+#define STATE_INTERFACE_H
 
 #include "config.h"
 
-using namespace cs334;
+namespace cs334 {
 
 /**
  * @brief An abstract base class for streamlining game states
@@ -37,6 +37,8 @@ public:
 public:
   const char* m_name;
   player_state_t* m_player;
-}
+};
 
-#endif /* GAME_H */
+};
+
+#endif /* STATE_INTERFACE_H */

@@ -6,6 +6,9 @@
 // Configuration file for setting global constants
 #define MAX_PLAYERS_N (10)
 
+
+namespace cs334 {
+
 /* -------------------------------------------------------------------------- */
 /*                                   TYPING                                   */
 /* -------------------------------------------------------------------------- */
@@ -19,6 +22,8 @@ typedef struct player_state {
   uint16_t health;
   std::string mac_address;
 } player_state_t;
+
+};
 
 
 #endif /* CONFIG_H */

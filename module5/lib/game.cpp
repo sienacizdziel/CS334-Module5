@@ -13,7 +13,7 @@
   #include <ESP8266WiFi.h>
 #endif
 
-using namespace cs334;
+namespace cs334 {
 
 /**
  * @brief Construct a new Game::Game object
@@ -49,3 +49,5 @@ void Game::loop() {
     state.run();
   }
 }
+
+};
