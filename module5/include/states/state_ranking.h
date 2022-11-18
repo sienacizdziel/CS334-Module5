@@ -1,13 +1,15 @@
 #ifndef STATE_RANKING_H
 #define STATE_RANKING_H
 
-#include "states/state_interface.h"
+#include "state_interface.h"
 
 namespace cs334 {
 
-class RankingState : GameState {
+class Game;
+
+class RankingState : public GameState {
  public:
-  RankingState(player_state_t* player_state) : GameState("ranking", player_state) {}
+  RankingState(Game* game) : GameState("ranking", game) {}
   void setup() override;
   void run() override;
 

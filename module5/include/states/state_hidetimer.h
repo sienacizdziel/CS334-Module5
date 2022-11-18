@@ -1,13 +1,15 @@
 #ifndef STATE_HIDETIMER_H
 #define STATE_HIDETIMER_H
 
-#include "states/state_interface.h"
+#include "state_interface.h"
 
 namespace cs334 {
 
-class HideTimerState: GameState {
+class Game;
+
+class HideTimerState: public GameState {
 public:
-  HideTimerState(player_state_t* player_state) : GameState("hide_timer", player_state) {}
+  HideTimerState(Game* game) : GameState("hide_timer", game) {}
   void setup() override;
   void run() override;
 private:

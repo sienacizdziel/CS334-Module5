@@ -5,31 +5,28 @@
 #include <map>
 #include <string>
 
+#include "freeRTOS/FreeRTOS.h"
 #include "freeRTOS/task.h"
 #include "config.h"
 
-namespace cs334 {
+namespace cs334::Client {
 
-class ESPNOWClient {
+class ESPNOW {
 public: // METHODS
-  ESPNOWClient();
+  ESPNOW(std::string mac_address);
+  ~ESPNOW();
 
   /**
    * @brief Begins an RTOS task, scanning for ESP-NOW connections
    * This is used to initialize the m_connected_players array.
    */
-  void begin_scan();
-
-  /**
-   * @brief xTask used to continually update m_connected_players with new connections
-   */
-  void scan_task(void * pvParameter);
+  void beginScan();
 
   /**
    * @brief Ends the RTOS task scanning for ESP-NOW connections
    * This allows us to know when our m_connected_players object is ready.
    */
-  void end_scan();
+  void endScan();
 
   /**
    * @brief Sends an ESP-NOW message to a specific MAC address.
@@ -50,13 +47,27 @@ public: // METHODS
    */
   void send(const char* message);
 
+  /**
+   * @brief xTask used to continually update m_connected_players with new connections
+   * 
+   * We use static so we can initiate this into its own xTaskCreate function.
+   */
+  void _scanTask(void);
+
 public: // MEMBERS 
 
-  // maps MAC addresses to player states. use this as a "set" for 
+  // save our mac address to be able to sort all MAC addresses
+  std::string m_mac_address;
+  // maps MAC addresses to player states
   std::map<std::string, player_state_t> m_connected_players;
 
 private: // MEMBERS
   TaskHandle_t m_scan_task_handle = NULL;
+
+  /**
+   * @brief Static wrapper around scan_task, used for starting the FreeRTOS task
+   */
+  static void _scanTaskImpl(void * _this);
 };
 
 };

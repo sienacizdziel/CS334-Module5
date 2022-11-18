@@ -1,13 +1,15 @@
 #ifndef STATE_INITIALIZATION_H
 #define STATE_INITIALIZATION_H
 
-#include "states/state_interface.h"
+#include "state_interface.h"
 
 namespace cs334 {
 
-class InitializationState: GameState {
+class Game;
+
+class InitializationState: public GameState {
 public:
-  InitializationState(player_state_t* player_state) : GameState("initialization", player_state) {}
+  InitializationState(Game* game) : GameState("initialization", game) {}
   void setup() override;
   void run() override;
 private:

@@ -1,4 +1,4 @@
-#include "lib/include/game.h"
+#include "include/game.h"
 
 cs334::Game *game;
 

@@ -5,6 +5,8 @@
 
 namespace cs334 {
 
+class Game;
+
 /**
  * @brief An abstract base class for streamlining game states
  * 
@@ -13,10 +15,11 @@ namespace cs334 {
  */
 class GameState {
 public:
-  GameState(const char* name, player_state_t* player_state) {
+  GameState(const char* name, Game* game) {
     m_name = name;
-    m_player = player_state;
+    m_game = game;
   }
+  virtual ~GameState() = default;
 
   /**
    * @brief A setup function for the state
@@ -34,9 +37,9 @@ public:
    */
   virtual void run();
 
-public:
+protected:
   const char* m_name;
-  player_state_t* m_player;
+  Game* m_game;
 };
 
 };

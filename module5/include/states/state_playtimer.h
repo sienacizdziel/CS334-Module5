@@ -1,13 +1,15 @@
 #ifndef STATE_PLAYTIMER_H
 #define STATE_PLAYTIMER_H
 
-#include "states/state_interface.h"
+#include "state_interface.h"
 
 namespace cs334 {
 
-class PlayTimerState: GameState {
+class Game;
+
+class PlayTimerState: public GameState {
 public:
-  PlayTimerState(player_state_t* player_state) : GameState("play_timer", player_state) {}
+  PlayTimerState(Game* game) : GameState("play_timer", game) {}
   void setup() override;
   void run() override;
 private:
