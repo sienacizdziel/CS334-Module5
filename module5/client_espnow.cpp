@@ -1,5 +1,11 @@
 #include "include/client_espnow.h"
+
 #include <functional>
+#ifdef ESP32
+  #include <WiFi.h>
+#else
+  #include <ESP8266WiFi.h>
+#endif
 
 namespace cs334::Client {
 
@@ -11,6 +17,9 @@ namespace cs334::Client {
 ESPNOW::ESPNOW(std::string mac_address) {
   m_mac_address = mac_address;
   m_connected_players = std::map<std::string, player_state_t>();
+  // prime the device for using ESP-NOW
+  WiFi.mode(WIFI_STA);
+  ESP_ERROR_CHECK(esp_now_init());
 }
 
 /**
@@ -67,7 +76,9 @@ void ESPNOW::_scanTaskImpl(void *_this) {
 /**
  * @brief The infinite loop to listen for ESP-NOW peers
  * 
- * 
+ * Should continually listen for "connect" messages from peers. For any peers'
+ * mac addresses that do not exist in our m_connected_players map, we should
+ * add them to the m_connected_players map.
  */
 void ESPNOW::_scanTask() {
   // ! TODO... set up ESP-NOW listening for peer connections
@@ -79,14 +90,26 @@ void ESPNOW::_scanTask() {
   }
 }
 
+
 /**
- * @brief Sends a 
+ * @brief Sends an ESP-NOW message to a specific connected peers
  * 
- * @param message 
+ * @param message_type
+ * @param message
  * @param mac_address 
  */
-void ESPNOW::send(const char* message, uint8_t* mac_address) {
+void ESPNOW::send(ESPNOWEvent::EventType message_type, const char* message, uint8_t* mac_address) {
   
+}
+
+/**
+ * @brief Broadcasts an ESP-NOW message to all connected peers
+ * 
+ * @param message_type
+ * @param message 
+ */
+void send(ESPNOWEvent::EventType message_type, const char* message) {
+
 }
 
 };

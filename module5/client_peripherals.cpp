@@ -59,7 +59,7 @@ void Peripherals::setLED(uint8_t r, uint8_t g, uint8_t b, uint16_t flashRate = 0
     };
     // begin task (static)
     xTaskCreate(
-      Client::Peripherals::_flashLEDImpl,
+      Peripherals::_flashLEDImpl,
       "client_peripherals LED flash",
       4,
       &taskInput,
@@ -92,7 +92,7 @@ void Peripherals::_flashLEDImpl(void *pvParameter) {
  * @param b [0-255] the B value
  */
 void Peripherals::_setLED(uint8_t r, uint8_t g, uint8_t b) {
-  // ! TODO: Fill out this function to write to the LED pini
+  // ! TODO: Fill out this function to write to the LED pins
 }
 
 /* -------------------------------------------------------------------------- */
@@ -100,7 +100,9 @@ void Peripherals::_setLED(uint8_t r, uint8_t g, uint8_t b) {
 /* -------------------------------------------------------------------------- */
 
 uint16_t Peripherals::getButtonPressDuration() {
-  // ! TODO: Fill out this function to get how long the button was pressed for
+  // ! TODO: Fill out this function to get how long the button has been pressed for, in ms.
+  // you may need to implement a FreeRTOS task queue to do this to keep track of the
+  // button in the background. when the button has not been pressed, returns 0.
   return 0;
 }
 
@@ -109,7 +111,7 @@ uint16_t Peripherals::getButtonPressDuration() {
 /* -------------------------------------------------------------------------- */
 
 float Peripherals::getPhotoresistorInput() {
-  // ! TODO: Fill out this function to get photoresistor input
+  // ! TODO: Fill out this function to get total photoresistor input [0-1]
   return 0;
 }
 

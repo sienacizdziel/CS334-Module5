@@ -7,9 +7,36 @@
 
 #include "freeRTOS/FreeRTOS.h"
 #include "freeRTOS/task.h"
+#include "Wifi.h"
+#include "esp_now.h"
 #include "config.h"
 
 namespace cs334::Client {
+
+namespace ESPNOWEvent {
+
+/**
+ * @brief An encoder for message event types
+ * 
+ */
+enum EventType {
+  CONNECT,
+};
+
+/**
+ * @brief A structure representing an ESP-NOW message
+ * 
+ * This is aligned to as to safely fall under the 250 byte limit of ESP-NOW
+ * messages. This allows us to parse a mac address, message type, and variable
+ * byte-encoded message data from the message.
+ */
+typedef struct esp_now_message_t {
+  uint8_t mac_address[8]; // 8 bytes
+  EventType message_type; // 1 byte
+  uint8_t message_event[128]; // 128 bytes
+} esp_now_message_t;
+
+}
 
 class ESPNOW {
 public: // METHODS
@@ -36,7 +63,7 @@ public: // METHODS
    * 
    * @param mac_address 
    */
-  void send(const char* message, uint8_t* mac_address);
+  void send(ESPNOWEvent::EventType message_type, const char* message, uint8_t* mac_address);
 
   /**
    * @brief Broadcasts an ESP-NOW message to all connected players.
@@ -45,7 +72,7 @@ public: // METHODS
    * 
    * @param mac_address 
    */
-  void send(const char* message);
+  void send(ESPNOWEvent::EventType message_type, const char* message);
 
   /**
    * @brief xTask used to continually update m_connected_players with new connections

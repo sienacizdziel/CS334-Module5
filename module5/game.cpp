@@ -25,7 +25,7 @@ Game::Game() {
   // build our base player object
   // get our mac address dynamically (UNTESTED)
   m_player.mac_address = std::string(WiFi.macAddress().c_str());
-  // build our ESP and Peripherals clients
+  // build our ESP and Peripherals clients, initializing both
   m_esp_client = new Client::ESPNOW(m_player.mac_address);
   m_peripherals_client = new Client::Peripherals();
   // add all of the states in order to the m_states vector
