@@ -2,6 +2,11 @@
 #define STATE_HIDETIMER_H
 
 #include "state_interface.h"
+#include <iostream>
+#include <chrono>
+#include <ctime>
+
+#define HIDE_TIME 300 // hide time set as 5 min
 
 namespace cs334 {
 
@@ -13,7 +18,7 @@ public:
   void setup() override;
   void run() override;
 private:
-  
+  auto start;
 };
 
 };
