@@ -77,6 +77,8 @@
     "utility": "cpp",
     "stop_token": "cpp",
     "__tree": "cpp",
-    "map": "cpp"
+    "map": "cpp",
+    "iostream": "cpp",
+    "__memory": "cpp"
   }
 }

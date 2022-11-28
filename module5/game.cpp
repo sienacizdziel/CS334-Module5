@@ -1,24 +1,24 @@
 #include "include/game.h"
 
 // include all our states.
+#include "include/state_1_connection.h"
+#include "include/state_2_initialization.h"
+#include "include/state_3_hidetimer.h"
+#include "include/state_4_playtimer.h"
+#include "include/state_5_ranking.h"
 #include <string>
-#include "include/states/state_connection.h"
-#include "include/states/state_initialization.h"
-#include "include/states/state_hidetimer.h"
-#include "include/states/state_playtimer.h"
-#include "include/states/state_ranking.h"
 
 #ifdef ESP32
-  #include <WiFi.h>
+#include <WiFi.h>
 #else
-  #include <ESP8266WiFi.h>
+#include <ESP8266WiFi.h>
 #endif
 
 namespace cs334 {
 
 /**
  * @brief Construct a new Game::Game object
- * 
+ *
  * Initializes all the state objects
  */
 Game::Game() {
@@ -41,7 +41,8 @@ Game::Game() {
  */
 Game::~Game() {
   // delete all the states we allocated
-  for (GameState* state : m_states) delete state;
+  for (GameState *state : m_states)
+    delete state;
   m_states.clear();
   delete m_esp_client;
   delete m_peripherals_client;
@@ -49,13 +50,13 @@ Game::~Game() {
 
 /**
  * @brief Synchronously iterate through each state
- * 
+ *
  */
 void Game::loop() {
-  for (const auto& state : m_states) {
+  for (const auto &state : m_states) {
     state->setup();
     state->run();
   }
 }
 
-};
+}; // namespace cs334

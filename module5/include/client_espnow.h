@@ -1,15 +1,19 @@
 #ifndef CLIENT_ESPNOW_H
 #define CLIENT_ESPNOW_H
 
-#include <stdbool.h>
 #include <map>
+#include <stdbool.h>
 #include <string>
 
+#include "config.h"
+#include "esp_now.h"
 #include "freeRTOS/FreeRTOS.h"
 #include "freeRTOS/task.h"
-#include "Wifi.h"
-#include "esp_now.h"
-#include "config.h"
+#ifdef ESP32
+#include <WiFi.h>
+#else
+#include <ESP8266WiFi.h>
+#endif
 
 namespace cs334::Client {
 
@@ -17,7 +21,7 @@ namespace ESPNOWEvent {
 
 /**
  * @brief An encoder for message event types
- * 
+ *
  */
 enum EventType {
   CONNECT,
@@ -25,18 +29,18 @@ enum EventType {
 
 /**
  * @brief A structure representing an ESP-NOW message
- * 
+ *
  * This is aligned to as to safely fall under the 250 byte limit of ESP-NOW
  * messages. This allows us to parse a mac address, message type, and variable
  * byte-encoded message data from the message.
  */
 typedef struct esp_now_message_t {
-  uint8_t mac_address[8]; // 8 bytes
-  EventType message_type; // 1 byte
+  uint8_t mac_address[8];     // 8 bytes
+  EventType message_type;     // 1 byte
   uint8_t message_event[128]; // 128 bytes
 } esp_now_message_t;
 
-}
+} // namespace ESPNOWEvent
 
 class ESPNOW {
 public: // METHODS
@@ -57,32 +61,33 @@ public: // METHODS
 
   /**
    * @brief Sends an ESP-NOW message to a specific MAC address.
-   * 
-   * Note that ESP-NOW messages are limited in size, to something like 256 bytes.
-   * So we should make sure to keep our messages super short.
-   * 
-   * @param mac_address 
+   *
+   * Note that ESP-NOW messages are limited in size, to something like 256
+   * bytes. So we should make sure to keep our messages super short.
+   *
+   * @param mac_address
    */
-  void send(ESPNOWEvent::EventType message_type, const char* message, uint8_t* mac_address);
+  void send(ESPNOWEvent::EventType message_type, const char *message,
+            uint8_t *mac_address);
 
   /**
    * @brief Broadcasts an ESP-NOW message to all connected players.
-   * 
-   * This function will be used by the authoritative node 
-   * 
-   * @param mac_address 
+   *
+   * This function will be used by the authoritative node
+   *
+   * @param mac_address
    */
-  void send(ESPNOWEvent::EventType message_type, const char* message);
+  void send(ESPNOWEvent::EventType message_type, const char *message);
 
   /**
-   * @brief xTask used to continually update m_connected_players with new connections
-   * 
+   * @brief xTask used to continually update m_connected_players with new
+   * connections
+   *
    * We use static so we can initiate this into its own xTaskCreate function.
    */
   void _scanTask(void);
 
-public: // MEMBERS 
-
+public: // MEMBERS
   // save our mac address to be able to sort all MAC addresses
   std::string m_mac_address;
   // maps MAC addresses to player states
@@ -94,9 +99,9 @@ private: // MEMBERS
   /**
    * @brief Static wrapper around scan_task, used for starting the FreeRTOS task
    */
-  static void _scanTaskImpl(void * _this);
+  static void _scanTaskImpl(void *_this);
 };
 
-};
+}; // namespace cs334::Client
 
 #endif /* CLIENT_ESPNOW_H */

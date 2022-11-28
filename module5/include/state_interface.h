@@ -9,13 +9,13 @@ class Game;
 
 /**
  * @brief An abstract base class for streamlining game states
- * 
+ *
  * Stores a reference to the player state, which is the common element which
  * must be updated throughout different game states.
  */
 class GameState {
 public:
-  GameState(const char* name, Game* game) {
+  GameState(const char *name, Game *game) {
     m_name = name;
     m_game = game;
   }
@@ -23,11 +23,12 @@ public:
 
   /**
    * @brief A setup function for the state
-   * 
+   *
    * Use this to make sure each state resets values that it will be changing
-   * to defaults. For example, the connection state should reset the ESPNOWClient
-   * peer list as well as the authoritative node, and the play state should
-   * reset the health, and the hide timer should reset the timer, etc.
+   * to defaults. For example, the connection state should reset the
+   * ESPNOWClient peer list as well as the authoritative node, and the play
+   * state should reset the health, and the hide timer should reset the timer,
+   * etc.
    */
   virtual void setup();
 
@@ -38,10 +39,10 @@ public:
   virtual void run();
 
 protected:
-  const char* m_name;
-  Game* m_game;
+  const char *m_name;
+  Game *m_game;
 };
 
-};
+}; // namespace cs334
 
 #endif /* STATE_INTERFACE_H */

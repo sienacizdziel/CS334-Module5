@@ -27,7 +27,7 @@ ESPNOW::ESPNOW(std::string mac_address) {
  * Ensures that the ESP scan stops on destructiion
  */
 ESPNOW::~ESPNOW() {
-  if (m_scan_task_handle != NULL) endScan();
+  endScan();
 }
 
 /* -------------------------------------------------------------------------- */
