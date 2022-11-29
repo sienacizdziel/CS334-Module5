@@ -23,9 +23,7 @@ namespace ESPNOWEvent {
  * @brief An encoder for message event types
  *
  */
-enum EventType {
-  CONNECT,
-};
+enum EventType { CONNECT, HEALTH };
 
 /**
  * @brief A structure representing an ESP-NOW message

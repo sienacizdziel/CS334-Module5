@@ -16,6 +16,11 @@ Peripherals::Peripherals() {
   for (const auto &photoresistor : m_photoresistors) {
     pinMode(photoresistor.pin, INPUT);
   }
+
+  // initialize LED pins
+  pinMode(PIN_LED_R, OUTPUT);
+  pinMode(PIN_LED_G, OUTPUT);
+  pinMode(PIN_LED_B, OUTPUT);
 }
 
 /**
@@ -93,7 +98,9 @@ void Peripherals::_flashLEDImpl(void *pvParameter) {
  * @param b [0-255] the B value
  */
 void Peripherals::_setLEDImpl(uint8_t r, uint8_t g, uint8_t b) {
-  // ! TODO: Fill out this function to write to the LED pins
+  analogWrite(PIN_LED_R, r);
+  analogWrite(PIN_LED_G, g);
+  analogWrite(PIN_LED_B, b);
 }
 
 /* -------------------------------------------------------------------------- */
