@@ -1,6 +1,8 @@
 #include "include/client_peripherals.h"
-#include "include/config.h"
+
 #include <Arduino.h>
+
+#include "include/config.h"
 
 namespace cs334::Client {
 
@@ -82,11 +84,15 @@ void Peripherals::setLED(uint8_t r, uint8_t g, uint8_t b, uint16_t flashRate) {
 void Peripherals::_flashLEDImpl(void *pvParameter) {
   led_flash_task_input_t *taskInput =
       static_cast<led_flash_task_input_t *>(pvParameter);
+  bool on = false;
+  TickType_t xLastWakeTime = xTaskGetTickCount();
   while (true) {
-    Peripherals::_setLEDImpl(taskInput->r, taskInput->g, taskInput->b);
-    vTaskDelay(taskInput->flashRate);
-    Peripherals::_setLEDImpl(0, 0, 0);
-    vTaskDelay(taskInput->flashRate);
+    if (!on)
+      Peripherals::_setLEDImpl(taskInput->r, taskInput->g, taskInput->b);
+    else
+      Peripherals::_setLEDImpl(0, 0, 0);
+    on = !on;
+    vTaskDelayUntil(&xLastWakeTime, taskInput->flashRate * portTICK_PERIOD_MS);
   }
 }
 
@@ -188,4 +194,4 @@ void Peripherals::_calibratePhotoresistorsImpl(void *pvParameter) {
   }
 }
 
-} // namespace cs334::Client
+}  // namespace cs334::Client
