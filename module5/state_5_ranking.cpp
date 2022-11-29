@@ -8,6 +8,7 @@ namespace cs334 {
  *
  */
 void RankingState::setup() {
+  Serial.println("ranking state setup");
   m_game->m_peripherals_client->setLED(255, 0, 255); // purple
 }
 
