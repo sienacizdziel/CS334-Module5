@@ -21,6 +21,9 @@ Peripherals::Peripherals() {
   pinMode(PIN_LED_R, OUTPUT);
   pinMode(PIN_LED_G, OUTPUT);
   pinMode(PIN_LED_B, OUTPUT);
+
+  // initialize button pin
+  pinMode(PIN_BUTTON, INPUT);
 }
 
 /**
@@ -112,7 +115,22 @@ uint16_t Peripherals::getButtonPressDuration() {
   // for, in ms. you may need to implement a FreeRTOS task queue to do this to
   // keep track of the button in the background. when the button has not been
   // pressed, returns 0.
-  return 0;
+
+  bool buttonPressed = false;
+  std::chrono::time_point<std::chrono::system_clock> start;
+
+  while (true) {
+    int buttonState = digitalRead(PIN_BUTTON);
+    if (buttonState == HIGH) {
+      if (!buttonPressed) { // on initial button press
+        start = millis();
+        buttonPressed = true;
+      }
+    } else {
+      return millis() - start;
+    }
+    delay(20);
+  }
 }
 
 /* -------------------------------------------------------------------------- */
