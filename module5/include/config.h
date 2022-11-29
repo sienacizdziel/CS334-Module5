@@ -22,6 +22,15 @@
 #define TIME_HIDING_SECONDS (300)
 #define TIME_PLAYING_SECONDS (300)
 
+// Used in state 4 to determine how much damage to deal players based on light
+// levels. High cutoff should correlate to flashlight, low cutoff should be
+// ambient light level.
+#define INITIAL_HEALTH (100)
+#define PHOTORESISTOR_CUTOFF_HIGH (0.8)
+#define PHOTORESISTOR_CUTOFF_LOW (0.5)
+#define HIGH_DAMAGE (5)
+#define LOW_DAMAGE (1)
+
 /* -------------------------------------------------------------------------- */
 /*                                   TYPING                                   */
 /* -------------------------------------------------------------------------- */
@@ -38,6 +47,6 @@ typedef struct player_state {
   std::string mac_address;
 } player_state_t;
 
-}; // namespace cs334
+};  // namespace cs334
 
 #endif /* CONFIG_H */
