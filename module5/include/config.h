@@ -9,6 +9,7 @@
 
 // Configuration file for setting global constants
 #define MAX_PLAYERS_N (10)
+#define AUTHORITY_NODE "MAC ADDRESS OF AUTHORITY NODE"
 
 // GPIO pins of each peripheral
 #define PIN_PHOTORESISTOR_1 (36)
