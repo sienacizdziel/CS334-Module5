@@ -10,6 +10,7 @@ namespace cs334 {
  * by the ESP-NOW client. Set the LED here to blink blue here as well.
  */
 void ConnectionState::setup() {
+  Serial.println("connection state setup");
   m_game->m_peripherals_client->setLED(0, 0, 255, 500);  // blinking blue
 }
 

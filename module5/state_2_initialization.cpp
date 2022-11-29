@@ -12,6 +12,7 @@ namespace cs334 {
  * initialization information (i.e. whether or not one is the seeker)
  */
 void InitializationState::setup() {
+  Serial.println("initialization state setup");
   // start calibrating the photoresistors
   m_game->m_peripherals_client->beginPhotoresistorCalibration();
   // set the initialization LED color
