@@ -11,7 +11,7 @@ namespace cs334::Client {
 
 /**
  * @brief Construct a new ESPNOWClient::ESPNOWClient object
- * 
+ *
  * Allocates the array for holding our connected player objects.
  */
 ESPNOW::ESPNOW(std::string mac_address) {
@@ -36,7 +36,7 @@ ESPNOW::~ESPNOW() {
 
 /**
  * @brief Begins the FreeRTOS task for scanning for connected players.
- * 
+ *
  * Uses xTaskCreate to begin a FreeRTOS task, saving the handle locally to
  * the ESPNOWClient instance. This handle is later used for ending the task.
  */
@@ -55,7 +55,7 @@ void ESPNOW::beginScan() {
 
 /**
  * @brief Ends the FreeRTOS task scanning for connected players.
- * 
+ *
  * Uses the handle from begin_scan to delete the task.
  */
 void ESPNOW::endScan() {
@@ -65,9 +65,9 @@ void ESPNOW::endScan() {
 }
 
 /**
- * @brief 
- * 
- * @param pvParameter 
+ * @brief
+ *
+ * @param pvParameter
  */
 void ESPNOW::_scanTaskImpl(void *_this) {
   ((ESPNOW*)_this)->_scanTask();
@@ -75,7 +75,7 @@ void ESPNOW::_scanTaskImpl(void *_this) {
 
 /**
  * @brief The infinite loop to listen for ESP-NOW peers
- * 
+ *
  * Should continually listen for "connect" messages from peers. For any peers'
  * mac addresses that do not exist in our m_connected_players map, we should
  * add them to the m_connected_players map.
@@ -93,20 +93,20 @@ void ESPNOW::_scanTask() {
 
 /**
  * @brief Sends an ESP-NOW message to a specific connected peers
- * 
+ *
  * @param message_type
  * @param message
- * @param mac_address 
+ * @param mac_address
  */
 void ESPNOW::send(ESPNOWEvent::EventType message_type, const char* message, uint8_t* mac_address) {
-  
+
 }
 
 /**
  * @brief Broadcasts an ESP-NOW message to all connected peers
- * 
+ *
  * @param message_type
- * @param message 
+ * @param message
  */
 void send(ESPNOWEvent::EventType message_type, const char* message) {
 

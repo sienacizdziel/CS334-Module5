@@ -91,6 +91,11 @@ public: // MEMBERS
   // maps MAC addresses to player states
   std::map<std::string, player_state_t> m_connected_players;
 
+  // @Srikar this should be dynamically updated from the authoritative node
+  // with the MAC address of currently connected members (I think)
+  std::vector<std::string> m_authoritative_connected_nodes;
+
+
 private: // MEMBERS
   TaskHandle_t m_scan_task_handle = NULL;
 

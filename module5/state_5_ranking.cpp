@@ -1,4 +1,6 @@
 #include "include/state_5_ranking.h"
+#include <map>
+#include "include/config.h"
 
 namespace cs334 {
 
@@ -21,8 +23,22 @@ void RankingState::setup() {
  * the loop, indicating a transition to the "connection" state.
  */
 void RankingState::run() {
-  while (true) {
-    delay(100);
+  if (m_game->m_player.mac_address == AUTHORITY_NODE) {
+    // wait for everyone to reconnect
+    while (m_authoritative_connected_nodes.size < m_esp_client->m_connected_players.size) {};
+    // then receive all the scores in a map
+    std::map<std::string, u_int16_t> healths;
+    // healths.sort();
+    // broadcast message to lowest health mac_address with WINNER
+    // wait for button press to continue to next state
+  } else {
+    // normal node
+    for (;;) {
+      // broadcast message to authoritative node with health
+      // listen for WINNER message
+      // listen for RESET message
+      // if RESET message received -> break;
+    }
   }
 }
 
