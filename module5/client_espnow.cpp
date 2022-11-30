@@ -6,10 +6,6 @@
   #include <ESP8266WiFi.h>
 #endif
 
-#define   MESH_PREFIX     "lightGame"
-#define   MESH_PASSWORD   "123456"
-#define   MESH_PORT       5555
-
 namespace cs334::Client {
 
 /**
@@ -24,11 +20,11 @@ ESPNOW::ESPNOW(std::string mac_address) {
   WiFi.mode(WIFI_STA);
   mesh.setDebugMsgTypes( ERROR | STARTUP );  // set before init() so that you can see startup messages
 
-  mesh.init( MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT );
-  mesh.onReceive(&receivedCallback);
-  mesh.onNewConnection(&newConnectionCallback);
-  mesh.onChangedConnections(&changedConnectionCallback);
-  mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
+  mesh.init( MESH_PREFIX, MESH_PASSWORD, &ESPNOW::userScheduler, MESH_PORT );
+  mesh.onReceive(&ESPNOW::receivedCallback);
+  mesh.onNewConnection(&ESPNOW::newConnectionCallback);
+  mesh.onChangedConnections(&ESPNOW::changedConnectionCallback);
+  mesh.onNodeTimeAdjusted(&ESPNOW::nodeTimeAdjustedCallback);
 
   userScheduler.addTask( taskSendMessage );
   taskSendMessage.enable();
@@ -104,34 +100,42 @@ void ESPNOW::_scanTask() {
 
 
 /**
- * @brief Sends an ESP-NOW message to a specific connected peers
+ * @brief Broadcasts Message
  * 
  * @param message_type
  * @param message
  * @param mac_address 
  */
-void send(ESPNOWEvent::EventType message_type, const char* message, uint8_t* mac_address) {
-    ESPNOWEvent::msg.mac_address = mac_address;
-    ESPNOWEvent::msg.message_type = message_type;
-    ESPNOWEvent::msg.message = message;
-    mesh.sendBroadcast((String) msg);
-    taskSendMessage.setInterval(TASK_SECOND)
+void ESPNOW::sendMessage() {
+  String message = msg_struct.message_type + msg_struct.message + mesh.getNodeId();
+  mesh.sendBroadcast(message);
+  taskSendMessage.setInterval(TASK_SECOND)
+}
+
+void ESPNOW::sendSingle(uint32_t dest, EventType message_type, String &message_data) {
+  String message = message_type + &message_data + mesh.getNodeId();
+  mesh.sendSingle(dest, message);
+}
+
+void ESPNOW::setMessage(EventType message_type, String &message_data) {
+  msg_struct.message_type = message_type;
+  msg_struct.message = &message_data;
 }
 
 // Needed for painless library
-void receivedCallback( uint32_t from, String &msg ) {
+void ESPNOW::receivedCallback( uint32_t from, String &msg ) {
   Serial.printf("startHere: Received from %u msg=%s\n", from, msg.c_str());
 }
 
-void newConnectionCallback(uint32_t nodeId) {
-    Serial.printf("--> startHere: New Connection, nodeId = %u\n", nodeId);
+void ESPNOW::newConnectionCallback(uint32_t nodeId) {
+  Serial.printf("--> startHere: New Connection, nodeId = %u\n", nodeId);
 }
 
-void changedConnectionCallback() {
+void ESPNOW::changedConnectionCallback() {
   Serial.printf("Changed connections\n");
 }
 
-void nodeTimeAdjustedCallback(int32_t offset) {
+void ESPNOW::nodeTimeAdjustedCallback(int32_t offset) {
     Serial.printf("Adjusted time %u. Offset = %d\n", mesh.getNodeTime(),offset);
 }
 

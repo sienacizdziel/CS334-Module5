@@ -33,16 +33,13 @@ enum EventType {
 };
 
 /**
- * @brief A structure representing an ESP-NOW message
+ * @brief A structure representing an panlessMesh message
  *
- * This is aligned to as to safely fall under the 250 byte limit of ESP-NOW
- * messages. This allows us to parse a mac address, message type, and variable
- * byte-encoded message data from the message.
+ * Struct includes message type and message buffer
  */
 typedef struct esp_now_message_t {
-  uint8_t mac_address[8];     // 8 bytes
   EventType message_type;     // 1 byte
-  uint8_t message_event[128]; // 128 bytes
+  String message;
 } esp_now_message_t;
 
 } // namespace ESPNOWEvent
@@ -64,25 +61,11 @@ public: // METHODS
    */
   void endScan();
 
-  /**
-   * @brief Sends an ESP-NOW message to a specific MAC address.
-   *
-   * Note that ESP-NOW messages are limited in size, to something like 256
-   * bytes. So we should make sure to keep our messages super short.
-   *
-   * @param mac_address
-   */
-  void send(ESPNOWEvent::EventType message_type, const char *message,
-            uint8_t *mac_address);
+  void sendMessage();
 
-  /**
-   * @brief Broadcasts an ESP-NOW message to all connected players.
-   *
-   * This function will be used by the authoritative node
-   *
-   * @param mac_address
-   */
-  void send(ESPNOWEvent::EventType message_type, const char *message);
+  void sendSingle(uint32_t dest, EventType message_type, String &message_data);
+
+  void setMessage(EventType message_type, String &message_data);
 
   /**
    * @brief xTask used to continually update m_connected_players with new
@@ -106,13 +89,14 @@ public: // MEMBERS
   std::string m_mac_address;
   // maps MAC addresses to player states
   std::map<std::string, player_state_t> m_connected_players;
+  // message to send out
+  esp_now_message_t msg_struct;
 
 private: // MEMBERS
   TaskHandle_t m_scan_task_handle = NULL;
   Task taskSendMessage( TASK_SECOND * 1 , TASK_FOREVER, &sendMessage );
   Scheduler userScheduler;
   painlessMesh mesh;
-  esp_now_message_t msg;
 
   /**
    * @brief Static wrapper around scan_task, used for starting the FreeRTOS task
