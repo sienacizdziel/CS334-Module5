@@ -7,6 +7,7 @@
 
 #include "config.h"
 #include "esp_now.h"
+#include "painlessMesh.h"
 #include "freeRTOS/FreeRTOS.h"
 #include "freeRTOS/task.h"
 #ifdef ESP32
@@ -14,6 +15,10 @@
 #else
 #include <ESP8266WiFi.h>
 #endif
+
+#define   MESH_PREFIX     "light_game"
+#define   MESH_PASSWORD   "123456"
+#define   MESH_PORT       5555
 
 namespace cs334::Client {
 
@@ -24,7 +29,7 @@ namespace ESPNOWEvent {
  *
  */
 enum EventType {
-  CONNECT,
+  CONNECT, HEALTH, ASSIGN, IGNORE
 };
 
 /**
@@ -87,6 +92,15 @@ public: // METHODS
    */
   void _scanTask(void);
 
+  // Needed for painless library
+  void receivedCallback( uint32_t from, String &msg );
+
+  void newConnectionCallback(uint32_t nodeId);
+
+  void changedConnectionCallback();
+
+  void nodeTimeAdjustedCallback(int32_t offset);
+
 public: // MEMBERS
   // save our mac address to be able to sort all MAC addresses
   std::string m_mac_address;
@@ -95,6 +109,10 @@ public: // MEMBERS
 
 private: // MEMBERS
   TaskHandle_t m_scan_task_handle = NULL;
+  Task taskSendMessage( TASK_SECOND * 1 , TASK_FOREVER, &sendMessage );
+  Scheduler userScheduler;
+  painlessMesh mesh;
+  esp_now_message_t msg;
 
   /**
    * @brief Static wrapper around scan_task, used for starting the FreeRTOS task
