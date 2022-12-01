@@ -78,9 +78,13 @@ static void pm_nodeTimeAdjustedCallback(int32_t offset) {
  * @param mac_address
  */
 static void pm_sendMessage() {
-  String message = msg_struct.message_type + msg_struct.message + mesh.getNodeId();
-  mesh.sendBroadcast(message);
-  taskSendMessage.setInterval(TASK_SECOND);
+  // String message = msg_struct.message_type + msg_struct.message + mesh.getNodeId();
+  // mesh.sendBroadcast(message);
+  // taskSendMessage.setInterval(TASK_SECOND * 1);
+  String msg = "Hi from node2";
+  msg += mesh.getNodeId();
+  mesh.sendBroadcast(msg);
+  taskSendMessage.setInterval(random(TASK_SECOND * 1, TASK_SECOND * 5));
 }
 
 /**
@@ -91,6 +95,18 @@ static void pm_sendMessage() {
  * add them to the m_connected_players map.
  */
 static void pm_scanTask(void *pvParameter) {
+  // set up the painless mesh with all the listeners
+  mesh.setDebugMsgTypes(ERROR | STARTUP);  // set before init() so that you can see startup messages
+  mesh.init(MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT);
+  mesh.onReceive(&pm_receivedCallback);
+  mesh.onNewConnection(&pm_newConnectionCallback);
+  mesh.onChangedConnections(&pm_changedConnectionCallback);
+  mesh.onNodeTimeAdjusted(&pm_nodeTimeAdjustedCallback);
+
+  // set up the message sending task
+  userScheduler.addTask(taskSendMessage);
+  taskSendMessage.enable();
+
   while (true) {
     mesh.update();
   }
@@ -108,18 +124,6 @@ static void pm_scanTask(void *pvParameter) {
 void ESPNOW::setup(bool p_is_authoritative) {
   // prime the device for using ESP-NOW
   // WiFi.mode(WIFI_STA);
-
-  // set up the painless mesh with all the listeners
-  mesh.setDebugMsgTypes(ERROR | DEBUG | CONNECTION | STARTUP);  // set before init() so that you can see startup messages
-  mesh.init(MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT);
-  mesh.onReceive(&pm_receivedCallback);
-  mesh.onNewConnection(&pm_newConnectionCallback);
-  mesh.onChangedConnections(&pm_changedConnectionCallback);
-  mesh.onNodeTimeAdjusted(&pm_nodeTimeAdjustedCallback);
-
-  // set up the message sending task
-  userScheduler.addTask(taskSendMessage);
-  taskSendMessage.enable();
 
   // sync authoritative state
   is_authoritative = p_is_authoritative;

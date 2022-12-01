@@ -55,7 +55,7 @@ Game::~Game() {
  *
  */
 void Game::loop() {
-  Serial.println("game started!");
+  Serial.println("Game started!");
   for (const auto &state : m_states) {
     state->setup();
     state->run();

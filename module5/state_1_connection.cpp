@@ -27,7 +27,7 @@ void ConnectionState::setup() {
  */
 void ConnectionState::run() {
   while (m_game->m_peripherals_client->m_button_press_duration < 5.f) {
-    delay(100);
+    delay(10);
   }
   Client::ESPNOW::endScan();
 }

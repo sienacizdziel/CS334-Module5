@@ -66,6 +66,8 @@ void destroy();
  */
 void beginScan();
 
+void updateScan();
+
 /**
  * @brief Ends the RTOS task scanning for ESP-NOW connections
  * This allows us to know when our m_connected_players object is ready.
