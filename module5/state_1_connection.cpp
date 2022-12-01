@@ -2,6 +2,8 @@
 
 #include <Arduino.h>
 
+#include "painlessMesh.h"
+
 namespace cs334 {
 
 /**
@@ -12,9 +14,8 @@ namespace cs334 {
  * by the ESP-NOW client. Set the LED here to blink blue here as well.
  */
 void ConnectionState::setup() {
-  Serial.println("connection state setup");
-  m_game->m_peripherals_client->setLED(0, 0, 255);              // blinking blue
-  m_game->m_peripherals_client->m_button_press_duration = 0.f;  // reset button duration listener
+  m_game->m_peripherals_client->setLED(0, 0, 255, 500);  // blinking blue
+  m_esp_client.beginScan();
 }
 
 /**
@@ -28,6 +29,7 @@ void ConnectionState::run() {
     Serial.printf("Button press: %.2f\n", m_game->m_peripherals_client->m_button_press_duration);
     delay(100);
   }
+  m_esp_client.endScan();
 }
 
 }  // namespace cs334

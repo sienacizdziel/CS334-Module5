@@ -1,5 +1,4 @@
 #include "include/client_espnow.h"
-
 #include <functional>
 #ifdef ESP32
   #include <WiFi.h>
@@ -14,11 +13,22 @@ namespace cs334::Client {
  *
  * Allocates the array for holding our connected player objects.
  */
-ESPNOW::ESPNOW(std::string mac_address) {
-  m_mac_address = mac_address;
-  m_connected_players = std::map<std::string, player_state_t>();
+ESPNOW::ESPNOW() {
+  m_connected_players = std::map<uint32_t, player_state_t>();
   // prime the device for using ESP-NOW
   WiFi.mode(WIFI_STA);
+  mesh.setDebugMsgTypes( ERROR | STARTUP );  // set before init() so that you can see startup messages
+
+  mesh.init( MESH_PREFIX, MESH_PASSWORD, &ESPNOW::userScheduler, MESH_PORT );
+  mesh.onReceive(&ESPNOW::receivedCallback);
+  mesh.onNewConnection(&ESPNOW::newConnectionCallback);
+  mesh.onChangedConnections(&ESPNOW::changedConnectionCallback);
+  mesh.onNodeTimeAdjusted(&ESPNOW::nodeTimeAdjustedCallback);
+
+  userScheduler.addTask( taskSendMessage );
+  taskSendMessage.enable();
+
+  
   ESP_ERROR_CHECK(esp_now_init());
 }
 
@@ -27,11 +37,12 @@ ESPNOW::ESPNOW(std::string mac_address) {
  * Ensures that the ESP scan stops on destructiion
  */
 ESPNOW::~ESPNOW() {
+  mesh.stop();
   endScan();
 }
 
 /* -------------------------------------------------------------------------- */
-/*                                  SCANNIING                                 */
+/*                                  SCANNING                                 */
 /* -------------------------------------------------------------------------- */
 
 /**
@@ -81,35 +92,63 @@ void ESPNOW::_scanTaskImpl(void *_this) {
  * add them to the m_connected_players map.
  */
 void ESPNOW::_scanTask() {
-  // ! TODO... set up ESP-NOW listening for peer connections
   while (true) {
-    // ! TODO... check if have received any messages over ESP-NOW
-
-    // pause for 100ms
-    vTaskDelay(100);
+    mesh.update();
   }
 }
 
 
 /**
- * @brief Sends an ESP-NOW message to a specific connected peers
- *
+ * @brief Broadcasts Message
+ * 
  * @param message_type
  * @param message
  * @param mac_address
  */
-void ESPNOW::send(ESPNOWEvent::EventType message_type, const char* message, uint8_t* mac_address) {
-
+void ESPNOW::sendMessage() {
+  String message = msg_struct.message_type + msg_struct.message + mesh.getNodeId();
+  mesh.sendBroadcast(message);
+  taskSendMessage.setInterval(TASK_SECOND)
 }
 
-/**
- * @brief Broadcasts an ESP-NOW message to all connected peers
- *
- * @param message_type
- * @param message
- */
-void send(ESPNOWEvent::EventType message_type, const char* message) {
-
+void ESPNOW::sendSingle(uint32_t dest, EventType message_type, String &message_data) {
+  String message = message_type + &message_data + mesh.getNodeId();
+  mesh.sendSingle(dest, message);
 }
+
+void ESPNOW::sendBroadcast(EventType message_type, String &message_data) {
+  msg_struct.message_type = message_type;
+  msg_struct.message = &message_data;
+}
+
+std::list<uint32_t> ESPNOW::getConnectedPlayers() {
+  return mesh.getNodeList();
+}
+
+uint32_t ESPNOW::getNodeId() {
+  return mesh.getNodeId();
+}
+
+// Needed for painless library
+void ESPNOW::receivedCallback( uint32_t from, String &msg ) {
+  Serial.printf("startHere: Received from %u msg=%s\n", from, msg.c_str());
+}
+
+void ESPNOW::newConnectionCallback(uint32_t nodeId) {
+  Serial.printf("--> startHere: New Connection, nodeId = %u\n", nodeId);
+  if (m_player.is_authoritative == true) {
+      player_state newPlayer{.nodeID = nodeId, .is_authoritative = false};
+      m_connected_players.insert(pair<uint32_t, player_state>(nodeId, newPlayer));
+  }
+}
+
+void ESPNOW::changedConnectionCallback() {
+  Serial.printf("Changed connections\n");
+}
+
+void ESPNOW::nodeTimeAdjustedCallback(int32_t offset) {
+    Serial.printf("Adjusted time %u. Offset = %d\n", mesh.getNodeTime(),offset);
+}
+
 
 };

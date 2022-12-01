@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 
+#include <chrono>
 #include <map>
 #include <string>
 #include <vector>
@@ -11,11 +12,16 @@
 #include "esp_now.h"
 #include "freeRTOS/FreeRTOS.h"
 #include "freeRTOS/task.h"
+#include "painlessMesh.h"
 #ifdef ESP32
 #include <WiFi.h>
 #else
 #include <ESP8266WiFi.h>
 #endif
+
+#define MESH_PREFIX "light_game"
+#define MESH_PASSWORD "123456"
+#define MESH_PORT 5555
 
 namespace cs334::Client {
 
@@ -25,27 +31,28 @@ namespace ESPNOWEvent {
  * @brief An encoder for message event types
  *
  */
-enum EventType { CONNECT,
-                 HEALTH };
+enum EventType {
+  CONNECT,
+  HEALTH,
+  ASSIGN,
+  IGNORE
+};
 
 /**
- * @brief A structure representing an ESP-NOW message
+ * @brief A structure representing an panlessMesh message
  *
- * This is aligned to as to safely fall under the 250 byte limit of ESP-NOW
- * messages. This allows us to parse a mac address, message type, and variable
- * byte-encoded message data from the message.
+ * Struct includes message type and message buffer
  */
 typedef struct esp_now_message_t {
-  uint8_t mac_address[8];      // 8 bytes
-  EventType message_type;      // 1 byte
-  uint8_t message_event[128];  // 128 bytes
+  EventType message_type;  // 1 byte
+  String message;
 } esp_now_message_t;
 
 }  // namespace ESPNOWEvent
 
 class ESPNOW {
  public:  // METHODS
-  ESPNOW(std::string mac_address);
+  ESPNOW();
   ~ESPNOW();
 
   /**
@@ -60,25 +67,15 @@ class ESPNOW {
    */
   void endScan();
 
-  /**
-   * @brief Sends an ESP-NOW message to a specific MAC address.
-   *
-   * Note that ESP-NOW messages are limited in size, to something like 256
-   * bytes. So we should make sure to keep our messages super short.
-   *
-   * @param mac_address
-   */
-  void send(ESPNOWEvent::EventType message_type, const char *message,
-            uint8_t *mac_address);
+  void sendMessage();
 
-  /**
-   * @brief Broadcasts an ESP-NOW message to all connected players.
-   *
-   * This function will be used by the authoritative node
-   *
-   * @param mac_address
-   */
-  void send(ESPNOWEvent::EventType message_type, const char *message);
+  void sendSingle(uint32_t dest, EventType message_type, String &message_data);
+
+  void sendBroadcast(EventType message_type, String &message_data);
+
+  std::list<uint32_t> getConnectedPlayers();
+
+  uint32_t getNodeId();
 
   /**
    * @brief xTask used to continually update m_connected_players with new
@@ -88,18 +85,26 @@ class ESPNOW {
    */
   void _scanTask(void);
 
- public:  // MEMBERS
-  // save our mac address to be able to sort all MAC addresses
-  std::string m_mac_address;
-  // maps MAC addresses to player states
-  std::map<std::string, player_state_t> m_connected_players;
+  // Needed for painless library
+  static void receivedCallback(uint32_t from, String &msg);
 
-  // @Srikar this should be dynamically updated from the authoritative node
-  // with the MAC address of currently connected members (I think)
-  std::vector<std::string> m_authoritative_connected_nodes;
+  static void newConnectionCallback(uint32_t nodeId);
+
+  static void changedConnectionCallback();
+
+  static void nodeTimeAdjustedCallback(int32_t offset);
+
+ public:  // MEMBERS
+  // maps MAC addresses to player states
+  static std::map<uint32_t, player_state_t> m_connected_players;
+  // message to send out
+  esp_now_message_t msg_struct;
 
  private:  // MEMBERS
   TaskHandle_t m_scan_task_handle = NULL;
+  Task taskSendMessage(TASK_SECOND * 1, TASK_FOREVER, &sendMessage);
+  Scheduler userScheduler;
+  painlessMesh mesh;
 
   /**
    * @brief Static wrapper around scan_task, used for starting the FreeRTOS task

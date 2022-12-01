@@ -24,6 +24,7 @@ public:
   // Peripherals client for receiving / sending peripheral states
   Client::ESPNOW *m_esp_client;
   Client::Peripherals *m_peripherals_client;
+  int num_initial_players = 0;
 
 private:
   // states of the game to iterate through
