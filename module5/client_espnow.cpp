@@ -9,13 +9,17 @@
 
 namespace cs334::Client {
 
+static void pm_sendMessage();
+
 static bool is_authoritative = false;
 static TaskHandle_t scan_task_handle = NULL;
 static std::map<uint32_t, player_state_t> connected_players;
 static Scheduler userScheduler;
 static painlessMesh mesh;
-static Task *taskSendMessage = NULL;
-static ESPNOWEvent::esp_now_message_t msg_struct;
+static Task taskSendMessage(TASK_SECOND * 1, TASK_FOREVER, &pm_sendMessage);
+static ESPNOWEvent::esp_now_message_t msg_struct{
+    .message_type = ESPNOWEvent::EventType::CONNECT,
+    .message = "hello world"};
 
 /* -------------------------------------------------------------------------- */
 /*                                  LISTENERS                                 */
@@ -76,7 +80,7 @@ static void pm_nodeTimeAdjustedCallback(int32_t offset) {
 static void pm_sendMessage() {
   String message = msg_struct.message_type + msg_struct.message + mesh.getNodeId();
   mesh.sendBroadcast(message);
-  taskSendMessage->setInterval(TASK_SECOND);
+  taskSendMessage.setInterval(TASK_SECOND);
 }
 
 /**
@@ -103,26 +107,22 @@ static void pm_scanTask(void *pvParameter) {
  */
 void ESPNOW::setup(bool p_is_authoritative) {
   // prime the device for using ESP-NOW
-  WiFi.mode(WIFI_STA);
+  // WiFi.mode(WIFI_STA);
 
   // set up the painless mesh with all the listeners
-  mesh.setDebugMsgTypes(ERROR | STARTUP);  // set before init() so that you can see startup messages
+  mesh.setDebugMsgTypes(ERROR | DEBUG | CONNECTION | STARTUP);  // set before init() so that you can see startup messages
   mesh.init(MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT);
-  mesh.onReceive(pm_receivedCallback);
-  mesh.onNewConnection(pm_newConnectionCallback);
-  mesh.onChangedConnections(pm_changedConnectionCallback);
-  mesh.onNodeTimeAdjusted(pm_nodeTimeAdjustedCallback);
+  mesh.onReceive(&pm_receivedCallback);
+  mesh.onNewConnection(&pm_newConnectionCallback);
+  mesh.onChangedConnections(&pm_changedConnectionCallback);
+  mesh.onNodeTimeAdjusted(&pm_nodeTimeAdjustedCallback);
 
   // set up the message sending task
-  taskSendMessage = new Task(TASK_SECOND, TASK_FOREVER, pm_sendMessage);
-  userScheduler.addTask(*taskSendMessage);
-  taskSendMessage->enable();
+  userScheduler.addTask(taskSendMessage);
+  taskSendMessage.enable();
 
   // sync authoritative state
   is_authoritative = p_is_authoritative;
-
-  // init ESP NOW
-  ESP_ERROR_CHECK(esp_now_init());
 }
 
 /**
@@ -132,7 +132,6 @@ void ESPNOW::setup(bool p_is_authoritative) {
 void ESPNOW::destroy() {
   mesh.stop();
   ESPNOW::endScan();
-  delete taskSendMessage;
 }
 
 /* -------------------------------------------------------------------------- */

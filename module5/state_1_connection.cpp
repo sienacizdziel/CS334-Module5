@@ -27,10 +27,8 @@ void ConnectionState::setup() {
  */
 void ConnectionState::run() {
   while (m_game->m_peripherals_client->m_button_press_duration < 5.f) {
-    Serial.printf("Button press: %.2f\n", m_game->m_peripherals_client->m_button_press_duration);
     delay(100);
   }
-  Serial.printf("Final button press: %.2f\n", m_game->m_peripherals_client->m_button_press_duration);
   Client::ESPNOW::endScan();
 }
 
