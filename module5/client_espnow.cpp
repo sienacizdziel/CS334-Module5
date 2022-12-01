@@ -151,7 +151,7 @@ void ESPNOW::beginScan() {
   xTaskCreate(
       pm_scanTask,
       "client_espnow SCAN",
-      1024,
+      4096,
       NULL,
       1,
       &scan_task_handle);
