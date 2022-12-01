@@ -27,4 +27,4 @@ void ConnectionState::run() {
   }
 }
 
-} // namespace cs334
+}  // namespace cs334

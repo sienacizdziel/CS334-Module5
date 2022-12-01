@@ -7,14 +7,15 @@
 namespace cs334 {
 
 class PlayTimerState : public GameState {
-public:
+ public:
   PlayTimerState(Game *game) : GameState("play_timer", game) {}
   void setup() override;
   void run() override;
 
-private:
+ private:
+  unsigned long start;
 };
 
-}; // namespace cs334
+};  // namespace cs334
 
 #endif /* STATE_4_PLAYTIMER_H */

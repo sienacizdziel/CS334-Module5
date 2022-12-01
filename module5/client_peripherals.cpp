@@ -1,6 +1,8 @@
 #include "include/client_peripherals.h"
-#include "include/config.h"
+
 #include <Arduino.h>
+
+#include "include/config.h"
 
 namespace cs334::Client {
 
@@ -16,6 +18,14 @@ Peripherals::Peripherals() {
   for (const auto &photoresistor : m_photoresistors) {
     pinMode(photoresistor.pin, INPUT);
   }
+
+  // initialize LED pins
+  pinMode(PIN_LED_R, OUTPUT);
+  pinMode(PIN_LED_G, OUTPUT);
+  pinMode(PIN_LED_B, OUTPUT);
+
+  // initialize button pin
+  pinMode(PIN_BUTTON, INPUT);
 }
 
 /**
@@ -77,11 +87,15 @@ void Peripherals::setLED(uint8_t r, uint8_t g, uint8_t b, uint16_t flashRate) {
 void Peripherals::_flashLEDImpl(void *pvParameter) {
   led_flash_task_input_t *taskInput =
       static_cast<led_flash_task_input_t *>(pvParameter);
+  bool on = false;
+  TickType_t xLastWakeTime = xTaskGetTickCount();
   while (true) {
-    Peripherals::_setLEDImpl(taskInput->r, taskInput->g, taskInput->b);
-    vTaskDelay(taskInput->flashRate);
-    Peripherals::_setLEDImpl(0, 0, 0);
-    vTaskDelay(taskInput->flashRate);
+    if (!on)
+      Peripherals::_setLEDImpl(taskInput->r, taskInput->g, taskInput->b);
+    else
+      Peripherals::_setLEDImpl(0, 0, 0);
+    on = !on;
+    vTaskDelayUntil(&xLastWakeTime, taskInput->flashRate * portTICK_PERIOD_MS);
   }
 }
 
@@ -93,7 +107,9 @@ void Peripherals::_flashLEDImpl(void *pvParameter) {
  * @param b [0-255] the B value
  */
 void Peripherals::_setLEDImpl(uint8_t r, uint8_t g, uint8_t b) {
-  // ! TODO: Fill out this function to write to the LED pins
+  analogWrite(PIN_LED_R, r);
+  analogWrite(PIN_LED_G, g);
+  analogWrite(PIN_LED_B, b);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -105,7 +121,22 @@ uint16_t Peripherals::getButtonPressDuration() {
   // for, in ms. you may need to implement a FreeRTOS task queue to do this to
   // keep track of the button in the background. when the button has not been
   // pressed, returns 0.
-  return 0;
+
+  bool buttonPressed = false;
+  std::chrono::time_point<std::chrono::system_clock> start;
+
+  while (true) {
+    int buttonState = digitalRead(PIN_BUTTON);
+    if (buttonState == HIGH) {
+      if (!buttonPressed) { // on initial button press
+        start = millis();
+        buttonPressed = true;
+      }
+    } else {
+      return millis() - start;
+    }
+    delay(20);
+  }
 }
 
 /* -------------------------------------------------------------------------- */
@@ -181,4 +212,4 @@ void Peripherals::_calibratePhotoresistorsImpl(void *pvParameter) {
   }
 }
 
-} // namespace cs334::Client
+}  // namespace cs334::Client

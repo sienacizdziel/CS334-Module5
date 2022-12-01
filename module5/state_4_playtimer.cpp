@@ -1,5 +1,7 @@
 #include "include/state_4_playtimer.h"
 
+#include <chrono>
+
 namespace cs334 {
 
 /**
@@ -10,11 +12,14 @@ namespace cs334 {
  * of the game to the correct values based on if it's a seeker or authoritative.
  */
 void PlayTimerState::setup() {
+  Serial.println("play timer state setup");
   if (m_game->m_player.is_seeker) {
-    m_game->m_peripherals_client->setLED(0, 255, 0); // green (seeker)
+    m_game->m_peripherals_client->setLED(0, 255, 0);  // green (seeker)
   } else {
-    m_game->m_peripherals_client->setLED(255, 0, 0); // red (hider)
+    m_game->m_peripherals_client->setLED(255, 0, 0);  // red (hider)
   }
+  m_game->m_player.health = 0;
+  start = millis();
 }
 
 /**
@@ -26,8 +31,20 @@ void PlayTimerState::setup() {
  */
 void PlayTimerState::run() {
   while (true) {
+    // add photoresistor damage to player's accumulated health
+    // TODO potentially add a multiplier for higher values (direct flashlight contact)
+    m_game->m_player.health += m_game->m_peripherals_client->getPhotoresistorInput();
+
+    // TODO possibly update LED flashing rate or brightness to indicate loss in health
+
+    // if we've been playing for the total match time, move on to the next state
+    if ((start - millis()) > (TIME_PLAYING_SECONDS * 1000)) {
+      break;
+    }
+
+    // adjust the delay to speed up or slow down damage
     delay(100);
   }
 }
 
-} // namespace cs334
+}  // namespace cs334

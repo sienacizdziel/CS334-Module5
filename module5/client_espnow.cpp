@@ -10,7 +10,7 @@ namespace cs334::Client {
 
 /**
  * @brief Construct a new ESPNOWClient::ESPNOWClient object
- * 
+ *
  * Allocates the array for holding our connected player objects.
  */
 ESPNOW::ESPNOW() {
@@ -47,7 +47,7 @@ ESPNOW::~ESPNOW() {
 
 /**
  * @brief Begins the FreeRTOS task for scanning for connected players.
- * 
+ *
  * Uses xTaskCreate to begin a FreeRTOS task, saving the handle locally to
  * the ESPNOWClient instance. This handle is later used for ending the task.
  */
@@ -66,7 +66,7 @@ void ESPNOW::beginScan() {
 
 /**
  * @brief Ends the FreeRTOS task scanning for connected players.
- * 
+ *
  * Uses the handle from begin_scan to delete the task.
  */
 void ESPNOW::endScan() {
@@ -76,9 +76,9 @@ void ESPNOW::endScan() {
 }
 
 /**
- * @brief 
- * 
- * @param pvParameter 
+ * @brief
+ *
+ * @param pvParameter
  */
 void ESPNOW::_scanTaskImpl(void *_this) {
   ((ESPNOW*)_this)->_scanTask();
@@ -103,7 +103,7 @@ void ESPNOW::_scanTask() {
  * 
  * @param message_type
  * @param message
- * @param mac_address 
+ * @param mac_address
  */
 void ESPNOW::sendMessage() {
   String message = msg_struct.message_type + msg_struct.message + mesh.getNodeId();
