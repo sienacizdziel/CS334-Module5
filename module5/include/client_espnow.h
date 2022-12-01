@@ -1,25 +1,27 @@
 #ifndef CLIENT_ESPNOW_H
 #define CLIENT_ESPNOW_H
 
-#include <map>
 #include <stdbool.h>
-#include <string>
+
 #include <chrono>
+#include <map>
+#include <string>
+#include <vector>
 
 #include "config.h"
 #include "esp_now.h"
-#include "painlessMesh.h"
 #include "freeRTOS/FreeRTOS.h"
 #include "freeRTOS/task.h"
+#include "painlessMesh.h"
 #ifdef ESP32
 #include <WiFi.h>
 #else
 #include <ESP8266WiFi.h>
 #endif
 
-#define   MESH_PREFIX     "light_game"
-#define   MESH_PASSWORD   "123456"
-#define   MESH_PORT       5555
+#define MESH_PREFIX "light_game"
+#define MESH_PASSWORD "123456"
+#define MESH_PORT 5555
 
 namespace cs334::Client {
 
@@ -30,7 +32,10 @@ namespace ESPNOWEvent {
  *
  */
 enum EventType {
-  CONNECT, HEALTH, ASSIGN, IGNORE
+  CONNECT,
+  HEALTH,
+  ASSIGN,
+  IGNORE
 };
 
 /**
@@ -39,14 +44,14 @@ enum EventType {
  * Struct includes message type and message buffer
  */
 typedef struct esp_now_message_t {
-  EventType message_type;     // 1 byte
+  EventType message_type;  // 1 byte
   String message;
 } esp_now_message_t;
 
-} // namespace ESPNOWEvent
+}  // namespace ESPNOWEvent
 
 class ESPNOW {
-public: // METHODS
+ public:  // METHODS
   ESPNOW();
   ~ESPNOW();
 
@@ -64,9 +69,9 @@ public: // METHODS
 
   void sendMessage();
 
-  void sendSingle(uint32_t dest, EventType message_type, String &message_data);
+  void sendSingle(uint32_t dest, ESPNOWEvent::EventType message_type, String &message_data);
 
-  void sendBroadcast(EventType message_type, String &message_data);
+  void sendBroadcast(ESPNOWEvent::EventType message_type, String &message_data);
 
   std::list<uint32_t> getConnectedPlayers();
 
@@ -81,7 +86,7 @@ public: // METHODS
   void _scanTask(void);
 
   // Needed for painless library
-  static void receivedCallback( uint32_t from, String &msg );
+  static void receivedCallback(uint32_t from, String &msg);
 
   static void newConnectionCallback(uint32_t nodeId);
 
@@ -89,15 +94,15 @@ public: // METHODS
 
   static void nodeTimeAdjustedCallback(int32_t offset);
 
-public: // MEMBERS
+ public:  // MEMBERS
   // maps MAC addresses to player states
   static std::map<uint32_t, player_state_t> m_connected_players;
   // message to send out
-  esp_now_message_t msg_struct;
+  ESPNOWEvent::esp_now_message_t msg_struct;
 
-private: // MEMBERS
+ private:  // MEMBERS
   TaskHandle_t m_scan_task_handle = NULL;
-  Task taskSendMessage( TASK_SECOND * 1 , TASK_FOREVER, &sendMessage );
+  Task taskSendMessage(TASK_SECOND * 1, TASK_FOREVER, &sendMessage);
   Scheduler userScheduler;
   painlessMesh mesh;
 
@@ -107,6 +112,6 @@ private: // MEMBERS
   static void _scanTaskImpl(void *_this);
 };
 
-}; // namespace cs334::Client
+};  // namespace cs334::Client
 
 #endif /* CLIENT_ESPNOW_H */

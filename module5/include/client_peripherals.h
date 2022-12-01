@@ -1,17 +1,19 @@
 #ifndef CLIENT_PERIPHERALS_H
 #define CLIENT_PERIPHERALS_H
 
+#include <math.h>
+
+#include <chrono>
+#include <vector>
+
 #include "config.h"
 #include "freeRTOS/FreeRTOS.h"
 #include "freeRTOS/task.h"
-#include <math.h>
-#include <vector>
-#include <chrono>
 
 namespace cs334::Client {
 
 class Peripherals {
-public: // METHODS
+ public:  // METHODS
   Peripherals();
   ~Peripherals();
 
@@ -35,7 +37,7 @@ public: // METHODS
    * @return 0 if button has not been pressed, otherwise duration of button
    * press in ms
    */
-  uint16_t getButtonPressDuration();
+  double getButtonPressDuration();
 
   /** [PERIPHERAL : Photoresistor]
    * @brief Get the average photoresistor input value
@@ -65,13 +67,20 @@ public: // METHODS
    */
   void endPhotoResistorCalibration();
 
-protected:
+  /* --------------------------- PERIPHERAL: BUTTON --------------------------- */
+
+  // publicly keep track of button press duration
+  double m_button_press_duration = 0.f;
+
+ protected:
   // Task created to flash the LED, if flashing is requested
   TaskHandle_t m_led_flash_handle = NULL;
   // Task created to calibrate the photoresistor
   TaskHandle_t m_photoresistor_calibrate_handle = NULL;
+  // Task created to check the button state
+  TaskHandle_t m_button_check_handle = NULL;
 
-private:
+ private:
   /* ----------------------------- PERIPHERAL: LED ----------------------------
    */
 
@@ -89,6 +98,9 @@ private:
 
   // Sets the LED value to the pin directly.
   static void _setLEDImpl(uint8_t r, uint8_t g, uint8_t b);
+
+  // Sets the button value to the pin directly.
+  static void _checkButtonImpl(void *pvParameter);
 
   /* ------------------------ PERIPHERAL: Photoresistor -----------------------
    */
@@ -111,6 +123,6 @@ private:
   static void _calibratePhotoresistorsImpl(void *pvParameter);
 };
 
-} // namespace cs334::Client
+}  // namespace cs334::Client
 
 #endif /* CLIENT_PERIPHERALS_H */

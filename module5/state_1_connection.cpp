@@ -1,4 +1,7 @@
 #include "include/state_1_connection.h"
+
+#include <Arduino.h>
+
 #include "painlessMesh.h"
 
 namespace cs334 {
@@ -11,7 +14,7 @@ namespace cs334 {
  * by the ESP-NOW client. Set the LED here to blink blue here as well.
  */
 void ConnectionState::setup() {
-  m_game->m_peripherals_client->setLED(0, 0, 255, 500); // blinking blue
+  m_game->m_peripherals_client->setLED(0, 0, 255, 500);  // blinking blue
   m_esp_client.beginScan();
 }
 
@@ -22,9 +25,9 @@ void ConnectionState::setup() {
  * the loop, indicating a transition to the "initialization" state.
  */
 void ConnectionState::run() {
-  while (true) {
-    vTaskDelay(30000);
-    break;
+  while (m_game->m_peripherals_client->m_button_press_duration < 5.f) {
+    Serial.printf("Button press: %.2f\n", m_game->m_peripherals_client->m_button_press_duration);
+    delay(100);
   }
   m_esp_client.endScan();
 }
