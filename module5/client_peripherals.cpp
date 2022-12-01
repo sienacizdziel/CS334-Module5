@@ -27,7 +27,7 @@ Peripherals::Peripherals() {
   pinMode(PIN_LED_B, OUTPUT);
 
   // initialize button pin
-  pinMode(PIN_BUTTON, INPUT);
+  pinMode(PIN_BUTTON, INPUT_PULLUP);
 
   // begin checking the button pin for press duration
   xTaskCreate(Peripherals::_checkButtonImpl,
@@ -131,14 +131,15 @@ void Peripherals::_checkButtonImpl(void *pvParameter) {
   double *button_press_duration = static_cast<double *>(pvParameter);
   bool buttonPressed = false;
   std::chrono::time_point<std::chrono::system_clock> start;
+  int buttonState;
   while (true) {
-    int buttonState = digitalRead(PIN_BUTTON);
-    if (buttonState == HIGH) {
+    buttonState = digitalRead(PIN_BUTTON);
+    if (buttonState == LOW) {
       if (!buttonPressed) {  // on initial button press
         start = std::chrono::system_clock::now();
         buttonPressed = true;
       }
-      *button_press_duration = (std::chrono::system_clock::now() - start).count();
+      *button_press_duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count() / 1000.f;
     } else {
       buttonPressed = false;
       *button_press_duration = 0.f;
