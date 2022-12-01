@@ -123,7 +123,7 @@ uint16_t Peripherals::getButtonPressDuration() {
   // pressed, returns 0.
 
   bool buttonPressed = false;
-  std::chrono::time_point<std::chrono::system_clock> start;
+  std::chrono::duration_cast<std::chrono::milliseconds> start;
 
   while (true) {
     int buttonState = digitalRead(PIN_BUTTON);
