@@ -1,5 +1,7 @@
 #include "include/state_5_ranking.h"
+
 #include <map>
+
 #include "include/config.h"
 
 namespace cs334 {
@@ -11,7 +13,7 @@ namespace cs334 {
  */
 void RankingState::setup() {
   Serial.println("ranking state setup");
-  m_game->m_peripherals_client->setLED(255, 0, 255); // purple
+  m_game->m_peripherals_client->setLED(255, 0, 255);  // purple
 }
 
 /**
@@ -25,7 +27,7 @@ void RankingState::setup() {
 void RankingState::run() {
   if (m_game->m_player.mac_address == AUTHORITY_NODE) {
     // wait for everyone to reconnect
-    while (m_authoritative_connected_nodes.size < m_esp_client->m_connected_players.size) {};
+    // while (m_authoritative_connected_nodes.size < m_esp_client->m_connected_players.size) {};
     // then receive all the scores in a map
     std::map<std::string, u_int16_t> healths;
     // healths.sort();
@@ -42,4 +44,4 @@ void RankingState::run() {
   }
 }
 
-} // namespace cs334
+}  // namespace cs334

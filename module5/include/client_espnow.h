@@ -1,9 +1,11 @@
 #ifndef CLIENT_ESPNOW_H
 #define CLIENT_ESPNOW_H
 
-#include <map>
 #include <stdbool.h>
+
+#include <map>
 #include <string>
+#include <vector>
 
 #include "config.h"
 #include "esp_now.h"
@@ -23,7 +25,8 @@ namespace ESPNOWEvent {
  * @brief An encoder for message event types
  *
  */
-enum EventType { CONNECT, HEALTH };
+enum EventType { CONNECT,
+                 HEALTH };
 
 /**
  * @brief A structure representing an ESP-NOW message
@@ -33,15 +36,15 @@ enum EventType { CONNECT, HEALTH };
  * byte-encoded message data from the message.
  */
 typedef struct esp_now_message_t {
-  uint8_t mac_address[8];     // 8 bytes
-  EventType message_type;     // 1 byte
-  uint8_t message_event[128]; // 128 bytes
+  uint8_t mac_address[8];      // 8 bytes
+  EventType message_type;      // 1 byte
+  uint8_t message_event[128];  // 128 bytes
 } esp_now_message_t;
 
-} // namespace ESPNOWEvent
+}  // namespace ESPNOWEvent
 
 class ESPNOW {
-public: // METHODS
+ public:  // METHODS
   ESPNOW(std::string mac_address);
   ~ESPNOW();
 
@@ -85,7 +88,7 @@ public: // METHODS
    */
   void _scanTask(void);
 
-public: // MEMBERS
+ public:  // MEMBERS
   // save our mac address to be able to sort all MAC addresses
   std::string m_mac_address;
   // maps MAC addresses to player states
@@ -95,8 +98,7 @@ public: // MEMBERS
   // with the MAC address of currently connected members (I think)
   std::vector<std::string> m_authoritative_connected_nodes;
 
-
-private: // MEMBERS
+ private:  // MEMBERS
   TaskHandle_t m_scan_task_handle = NULL;
 
   /**
@@ -105,6 +107,6 @@ private: // MEMBERS
   static void _scanTaskImpl(void *_this);
 };
 
-}; // namespace cs334::Client
+};  // namespace cs334::Client
 
 #endif /* CLIENT_ESPNOW_H */

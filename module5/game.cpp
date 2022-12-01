@@ -1,12 +1,13 @@
 #include "include/game.h"
 
 // include all our states.
+#include <string>
+
 #include "include/state_1_connection.h"
 #include "include/state_2_initialization.h"
 #include "include/state_3_hidetimer.h"
 #include "include/state_4_playtimer.h"
 #include "include/state_5_ranking.h"
-#include <string>
 
 #ifdef ESP32
 #include <WiFi.h>
@@ -53,10 +54,11 @@ Game::~Game() {
  *
  */
 void Game::loop() {
+  Serial.println("game started!");
   for (const auto &state : m_states) {
     state->setup();
     state->run();
   }
 }
 
-}; // namespace cs334
+};  // namespace cs334

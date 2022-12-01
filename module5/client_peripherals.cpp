@@ -2,6 +2,8 @@
 
 #include <Arduino.h>
 
+#include <chrono>
+
 #include "include/config.h"
 
 namespace cs334::Client {
@@ -26,6 +28,11 @@ Peripherals::Peripherals() {
 
   // initialize button pin
   pinMode(PIN_BUTTON, INPUT);
+
+  // begin checking the button pin for press duration
+  xTaskCreate(Peripherals::_checkButtonImpl,
+              "button check client_peripherals ", 1024,
+              &m_button_press_duration, 2, &m_button_check_handle);
 }
 
 /**
@@ -41,6 +48,10 @@ Peripherals::~Peripherals() {
   if (m_photoresistor_calibrate_handle != NULL) {
     vTaskDelete(m_photoresistor_calibrate_handle);
     m_photoresistor_calibrate_handle = NULL;
+  }
+  if (m_button_check_handle != NULL) {
+    vTaskDelete(m_button_check_handle);
+    m_button_check_handle = NULL;
   }
 }
 
@@ -74,7 +85,7 @@ void Peripherals::setLED(uint8_t r, uint8_t g, uint8_t b, uint16_t flashRate) {
     led_flash_task_input_t taskInput{
         .r = r, .g = g, .b = b, .flashRate = flashRate, ._this = this};
     // begin task (static)
-    xTaskCreate(Peripherals::_flashLEDImpl, "client_peripherals LED flash", 4,
+    xTaskCreate(Peripherals::_flashLEDImpl, "LED flash client_peripherals", 256,
                 &taskInput, 1, &m_led_flash_handle);
   }
 }
@@ -95,7 +106,7 @@ void Peripherals::_flashLEDImpl(void *pvParameter) {
     else
       Peripherals::_setLEDImpl(0, 0, 0);
     on = !on;
-    vTaskDelayUntil(&xLastWakeTime, taskInput->flashRate * portTICK_PERIOD_MS);
+    vTaskDelayUntil(&xLastWakeTime, taskInput->flashRate / portTICK_PERIOD_MS);
   }
 }
 
@@ -116,26 +127,23 @@ void Peripherals::_setLEDImpl(uint8_t r, uint8_t g, uint8_t b) {
 /*                             PERIPHERALS: BUTTON                            */
 /* -------------------------------------------------------------------------- */
 
-uint16_t Peripherals::getButtonPressDuration() {
-  // ! TODO: Fill out this function to get how long the button has been pressed
-  // for, in ms. you may need to implement a FreeRTOS task queue to do this to
-  // keep track of the button in the background. when the button has not been
-  // pressed, returns 0.
-
+void Peripherals::_checkButtonImpl(void *pvParameter) {
+  double *button_press_duration = static_cast<double *>(pvParameter);
   bool buttonPressed = false;
   std::chrono::time_point<std::chrono::system_clock> start;
-
   while (true) {
     int buttonState = digitalRead(PIN_BUTTON);
     if (buttonState == HIGH) {
-      if (!buttonPressed) { // on initial button press
-        start = millis();
+      if (!buttonPressed) {  // on initial button press
+        start = std::chrono::system_clock::now();
         buttonPressed = true;
       }
+      *button_press_duration = (std::chrono::system_clock::now() - start).count();
     } else {
-      return millis() - start;
+      buttonPressed = false;
+      *button_press_duration = 0.f;
     }
-    delay(20);
+    delay(100);
   }
 }
 
@@ -170,7 +178,7 @@ void Peripherals::beginPhotoresistorCalibration() {
   endPhotoResistorCalibration();
   // begin task (static)
   xTaskCreate(Peripherals::_calibratePhotoresistorsImpl,
-              "client_peripherals photoresistor calibration", 4,
+              "photoresistor calibration client_peripherals", 256,
               &m_photoresistors, 1, &m_photoresistor_calibrate_handle);
 }
 

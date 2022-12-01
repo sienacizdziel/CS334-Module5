@@ -1,5 +1,7 @@
 #include "include/state_1_connection.h"
 
+#include <Arduino.h>
+
 namespace cs334 {
 
 /**
@@ -11,7 +13,8 @@ namespace cs334 {
  */
 void ConnectionState::setup() {
   Serial.println("connection state setup");
-  m_game->m_peripherals_client->setLED(0, 0, 255, 500);  // blinking blue
+  m_game->m_peripherals_client->setLED(0, 0, 255);              // blinking blue
+  m_game->m_peripherals_client->m_button_press_duration = 0.f;  // reset button duration listener
 }
 
 /**
@@ -21,7 +24,8 @@ void ConnectionState::setup() {
  * the loop, indicating a transition to the "initialization" state.
  */
 void ConnectionState::run() {
-  while (true) {
+  while (m_game->m_peripherals_client->m_button_press_duration < 5.f) {
+    Serial.printf("Button press: %.2f\n", m_game->m_peripherals_client->m_button_press_duration);
     delay(100);
   }
 }
