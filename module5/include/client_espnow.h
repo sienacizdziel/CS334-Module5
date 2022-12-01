@@ -50,67 +50,35 @@ typedef struct esp_now_message_t {
 
 }  // namespace ESPNOWEvent
 
-class ESPNOW {
- public:  // METHODS
-  ESPNOW();
-  ~ESPNOW();
+namespace ESPNOW {
 
-  /**
-   * @brief Begins an RTOS task, scanning for ESP-NOW connections
-   * This is used to initialize the m_connected_players array.
-   */
-  void beginScan();
+/**
+ * @brief
+ *
+ * @param is_authoritative
+ */
+void setup(bool is_authoritative = false);
+void destroy();
 
-  /**
-   * @brief Ends the RTOS task scanning for ESP-NOW connections
-   * This allows us to know when our m_connected_players object is ready.
-   */
-  void endScan();
+/**
+ * @brief Begins an RTOS task, scanning for ESP-NOW connections
+ * This is used to initialize the m_connected_players array.
+ */
+void beginScan();
 
-  void sendSingle(uint32_t dest, ESPNOWEvent::EventType message_type, String &message_data);
+/**
+ * @brief Ends the RTOS task scanning for ESP-NOW connections
+ * This allows us to know when our m_connected_players object is ready.
+ */
+void endScan();
 
-  void sendBroadcast(ESPNOWEvent::EventType message_type, String &message_data);
+void sendSingle(uint32_t dest, ESPNOWEvent::EventType message_type, String &message_data);
+void sendBroadcast(ESPNOWEvent::EventType message_type, String &message_data);
+static void sendMessage();
+std::list<uint32_t> getConnectedPlayers();
+uint32_t getNodeId();
 
-  std::list<uint32_t> getConnectedPlayers();
-
-  uint32_t getNodeId();
-
-  /**
-   * @brief xTask used to continually update m_connected_players with new
-   * connections
-   *
-   * We use static so we can initiate this into its own xTaskCreate function.
-   */
-  void _scanTask(void);
-
-  static void sendMessage();
-
-  // Needed for painless library
-  static void receivedCallback(uint32_t from, String &msg);
-
-  static void newConnectionCallback(uint32_t nodeId);
-
-  static void changedConnectionCallback();
-
-  static void nodeTimeAdjustedCallback(int32_t offset);
-
- public:  // MEMBERS
-  // maps MAC addresses to player states
-  static std::map<uint32_t, player_state_t> m_connected_players;
-  // message to send out
-  ESPNOWEvent::esp_now_message_t msg_struct;
-
- private:  // MEMBERS
-  TaskHandle_t m_scan_task_handle = NULL;
-  Task *taskSendMessage = NULL;
-  Scheduler userScheduler;
-  painlessMesh mesh;
-
-  /**
-   * @brief Static wrapper around scan_task, used for starting the FreeRTOS task
-   */
-  static void _scanTaskImpl(void *_this);
-};
+}  // namespace ESPNOW
 
 };  // namespace cs334::Client
 

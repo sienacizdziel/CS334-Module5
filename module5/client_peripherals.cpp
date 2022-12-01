@@ -85,7 +85,7 @@ void Peripherals::setLED(uint8_t r, uint8_t g, uint8_t b, uint16_t flashRate) {
     led_flash_task_input_t taskInput{
         .r = r, .g = g, .b = b, .flashRate = flashRate, ._this = this};
     // begin task (static)
-    xTaskCreate(Peripherals::_flashLEDImpl, "LED flash client_peripherals", 256,
+    xTaskCreate(Peripherals::_flashLEDImpl, "LED flash client_peripherals", 1024,
                 &taskInput, 1, &m_led_flash_handle);
   }
 }
@@ -178,7 +178,7 @@ void Peripherals::beginPhotoresistorCalibration() {
   endPhotoResistorCalibration();
   // begin task (static)
   xTaskCreate(Peripherals::_calibratePhotoresistorsImpl,
-              "photoresistor calibration client_peripherals", 256,
+              "photoresistor calibration client_peripherals", 1024,
               &m_photoresistors, 1, &m_photoresistor_calibrate_handle);
 }
 

@@ -14,8 +14,9 @@ namespace cs334 {
  * by the ESP-NOW client. Set the LED here to blink blue here as well.
  */
 void ConnectionState::setup() {
-  m_game->m_peripherals_client->setLED(0, 0, 255, 500);  // blinking blue
-  m_game->m_esp_client->beginScan();
+  m_game->m_peripherals_client->setLED(0, 0, 255);  // blinking blue
+  Serial.printf("run connectioin state.");
+  Client::ESPNOW::beginScan();
 }
 
 /**
@@ -29,7 +30,8 @@ void ConnectionState::run() {
     Serial.printf("Button press: %.2f\n", m_game->m_peripherals_client->m_button_press_duration);
     delay(100);
   }
-  m_game->m_esp_client->endScan();
+  Serial.printf("Final button press: %.2f\n", m_game->m_peripherals_client->m_button_press_duration);
+  Client::ESPNOW::endScan();
 }
 
 }  // namespace cs334
