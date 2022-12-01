@@ -12,6 +12,7 @@ namespace cs334 {
  */
 void ConnectionState::setup() {
   m_game->m_peripherals_client->setLED(0, 0, 255, 500); // blinking blue
+  m_esp_client.beginScan();
 }
 
 /**
@@ -22,7 +23,7 @@ void ConnectionState::setup() {
  */
 void ConnectionState::run() {
   while (true) {
-    delay(100);
+    vTaskDelay(30000);
   }
 }
 
