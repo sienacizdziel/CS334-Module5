@@ -69,9 +69,9 @@ class ESPNOW {
 
   void sendMessage();
 
-  void sendSingle(uint32_t dest, EventType message_type, String &message_data);
+  void sendSingle(uint32_t dest, ESPNOWEvent::EventType message_type, String &message_data);
 
-  void sendBroadcast(EventType message_type, String &message_data);
+  void sendBroadcast(ESPNOWEvent::EventType message_type, String &message_data);
 
   std::list<uint32_t> getConnectedPlayers();
 
@@ -98,7 +98,7 @@ class ESPNOW {
   // maps MAC addresses to player states
   static std::map<uint32_t, player_state_t> m_connected_players;
   // message to send out
-  esp_now_message_t msg_struct;
+  ESPNOWEvent::esp_now_message_t msg_struct;
 
  private:  // MEMBERS
   TaskHandle_t m_scan_task_handle = NULL;

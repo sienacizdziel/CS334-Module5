@@ -111,12 +111,12 @@ void ESPNOW::sendMessage() {
   taskSendMessage.setInterval(TASK_SECOND)
 }
 
-void ESPNOW::sendSingle(uint32_t dest, EventType message_type, String &message_data) {
+void ESPNOW::sendSingle(uint32_t dest, ESPNOWEvent::EventType message_type, String &message_data) {
   String message = message_type + &message_data + mesh.getNodeId();
   mesh.sendSingle(dest, message);
 }
 
-void ESPNOW::sendBroadcast(EventType message_type, String &message_data) {
+void ESPNOW::sendBroadcast(ESPNOWEvent::EventType message_type, String &message_data) {
   msg_struct.message_type = message_type;
   msg_struct.message = &message_data;
 }
