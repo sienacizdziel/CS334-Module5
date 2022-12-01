@@ -35,7 +35,7 @@ typedef struct player_state {
   bool is_seeker;
   bool is_authoritative;
   uint16_t health;
-  std::string mac_address;
+  uint32_t node_id;
 } player_state_t;
 
 }; // namespace cs334

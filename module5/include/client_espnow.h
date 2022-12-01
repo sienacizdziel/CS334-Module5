@@ -46,7 +46,7 @@ typedef struct esp_now_message_t {
 
 class ESPNOW {
 public: // METHODS
-  ESPNOW(std::string mac_address);
+  ESPNOW();
   ~ESPNOW();
 
   /**
@@ -65,7 +65,11 @@ public: // METHODS
 
   void sendSingle(uint32_t dest, EventType message_type, String &message_data);
 
-  void setMessage(EventType message_type, String &message_data);
+  void sendBroadcast(EventType message_type, String &message_data);
+
+  std::list<uint32_t> getConnectedPlayers();
+
+  uint32_t getNodeId();
 
   /**
    * @brief xTask used to continually update m_connected_players with new
@@ -76,19 +80,17 @@ public: // METHODS
   void _scanTask(void);
 
   // Needed for painless library
-  void receivedCallback( uint32_t from, String &msg );
+  static void receivedCallback( uint32_t from, String &msg );
 
-  void newConnectionCallback(uint32_t nodeId);
+  static void newConnectionCallback(uint32_t nodeId);
 
-  void changedConnectionCallback();
+  static void changedConnectionCallback();
 
-  void nodeTimeAdjustedCallback(int32_t offset);
+  static void nodeTimeAdjustedCallback(int32_t offset);
 
 public: // MEMBERS
-  // save our mac address to be able to sort all MAC addresses
-  std::string m_mac_address;
   // maps MAC addresses to player states
-  std::map<std::string, player_state_t> m_connected_players;
+  static std::map<uint32_t, player_state_t> m_connected_players;
   // message to send out
   esp_now_message_t msg_struct;
 

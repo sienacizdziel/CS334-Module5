@@ -22,12 +22,14 @@ namespace cs334 {
  * Initializes all the state objects
  */
 Game::Game() {
-  // build our base player object
-  // get our mac address dynamically (UNTESTED)
-  m_player.mac_address = std::string(WiFi.macAddress().c_str());
   // build our ESP and Peripherals clients, initializing both
-  m_esp_client = new Client::ESPNOW(m_player.mac_address);
+  m_esp_client = new Client::ESPNOW();
   m_peripherals_client = new Client::Peripherals();
+
+  // build our base player object
+  // get our nodeID dynamically (UNTESTED)
+  m_player.node_id = m_esp_client->getNodeId();
+
   // add all of the states in order to the m_states vector
   m_states.push_back(new ConnectionState(this));
   m_states.push_back(new InitializationState(this));

@@ -13,9 +13,8 @@ namespace cs334::Client {
  * 
  * Allocates the array for holding our connected player objects.
  */
-ESPNOW::ESPNOW(std::string mac_address) {
-  m_mac_address = mac_address;
-  m_connected_players = std::map<std::string, player_state_t>();
+ESPNOW::ESPNOW() {
+  m_connected_players = std::map<uint32_t, player_state_t>();
   // prime the device for using ESP-NOW
   WiFi.mode(WIFI_STA);
   mesh.setDebugMsgTypes( ERROR | STARTUP );  // set before init() so that you can see startup messages
@@ -117,9 +116,17 @@ void ESPNOW::sendSingle(uint32_t dest, EventType message_type, String &message_d
   mesh.sendSingle(dest, message);
 }
 
-void ESPNOW::setMessage(EventType message_type, String &message_data) {
+void ESPNOW::sendBroadcast(EventType message_type, String &message_data) {
   msg_struct.message_type = message_type;
   msg_struct.message = &message_data;
+}
+
+std::list<uint32_t> ESPNOW::getConnectedPlayers() {
+  return mesh.getNodeList();
+}
+
+uint32_t ESPNOW::getNodeId() {
+  return mesh.getNodeId();
 }
 
 // Needed for painless library
@@ -129,6 +136,10 @@ void ESPNOW::receivedCallback( uint32_t from, String &msg ) {
 
 void ESPNOW::newConnectionCallback(uint32_t nodeId) {
   Serial.printf("--> startHere: New Connection, nodeId = %u\n", nodeId);
+  if (m_player.is_authoritative == true) {
+      player_state newPlayer{.nodeID = nodeId, .is_authoritative = false};
+      m_connected_players.insert(pair<uint32_t, player_state>(nodeId, newPlayer));
+  }
 }
 
 void ESPNOW::changedConnectionCallback() {
