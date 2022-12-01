@@ -24,7 +24,9 @@ void ConnectionState::setup() {
 void ConnectionState::run() {
   while (true) {
     vTaskDelay(30000);
+    break;
   }
+  m_esp_client.endScan();
 }
 
 }  // namespace cs334
