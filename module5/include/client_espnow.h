@@ -67,8 +67,6 @@ class ESPNOW {
    */
   void endScan();
 
-  void sendMessage();
-
   void sendSingle(uint32_t dest, ESPNOWEvent::EventType message_type, String &message_data);
 
   void sendBroadcast(ESPNOWEvent::EventType message_type, String &message_data);
@@ -84,6 +82,8 @@ class ESPNOW {
    * We use static so we can initiate this into its own xTaskCreate function.
    */
   void _scanTask(void);
+
+  static void sendMessage();
 
   // Needed for painless library
   static void receivedCallback(uint32_t from, String &msg);
@@ -102,7 +102,7 @@ class ESPNOW {
 
  private:  // MEMBERS
   TaskHandle_t m_scan_task_handle = NULL;
-  Task taskSendMessage(TASK_SECOND * 1, TASK_FOREVER, &sendMessage);
+  Task *taskSendMessage = NULL;
   Scheduler userScheduler;
   painlessMesh mesh;
 

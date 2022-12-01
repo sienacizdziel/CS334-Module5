@@ -1,9 +1,10 @@
 #include "include/client_espnow.h"
+
 #include <functional>
 #ifdef ESP32
-  #include <WiFi.h>
+#include <WiFi.h>
 #else
-  #include <ESP8266WiFi.h>
+#include <ESP8266WiFi.h>
 #endif
 
 namespace cs334::Client {
@@ -17,18 +18,18 @@ ESPNOW::ESPNOW() {
   m_connected_players = std::map<uint32_t, player_state_t>();
   // prime the device for using ESP-NOW
   WiFi.mode(WIFI_STA);
-  mesh.setDebugMsgTypes( ERROR | STARTUP );  // set before init() so that you can see startup messages
+  mesh.setDebugMsgTypes(ERROR | STARTUP);  // set before init() so that you can see startup messages
 
-  mesh.init( MESH_PREFIX, MESH_PASSWORD, &ESPNOW::userScheduler, MESH_PORT );
+  mesh.init(MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT);
   mesh.onReceive(&ESPNOW::receivedCallback);
   mesh.onNewConnection(&ESPNOW::newConnectionCallback);
   mesh.onChangedConnections(&ESPNOW::changedConnectionCallback);
   mesh.onNodeTimeAdjusted(&ESPNOW::nodeTimeAdjustedCallback);
 
-  userScheduler.addTask( taskSendMessage );
-  taskSendMessage.enable();
+  taskSendMessage = new Task(TASK_SECOND, TASK_FOREVER, &ESPNOW::sendMessage);
+  userScheduler.addTask(*taskSendMessage);
+  taskSendMessage->enable();
 
-  
   ESP_ERROR_CHECK(esp_now_init());
 }
 
@@ -38,6 +39,7 @@ ESPNOW::ESPNOW() {
  */
 ESPNOW::~ESPNOW() {
   mesh.stop();
+  delete taskSendMessage;
   endScan();
 }
 
@@ -55,13 +57,12 @@ void ESPNOW::beginScan() {
   if (m_scan_task_handle != NULL) endScan();
   m_connected_players.clear();
   xTaskCreate(
-    Client::ESPNOW::_scanTaskImpl,
-    "client_espnow SCAN",
-    4,
-    this,
-    1,
-    &m_scan_task_handle
-  );
+      Client::ESPNOW::_scanTaskImpl,
+      "client_espnow SCAN",
+      4,
+      this,
+      1,
+      &m_scan_task_handle);
 }
 
 /**
@@ -81,7 +82,7 @@ void ESPNOW::endScan() {
  * @param pvParameter
  */
 void ESPNOW::_scanTaskImpl(void *_this) {
-  ((ESPNOW*)_this)->_scanTask();
+  ((ESPNOW *)_this)->_scanTask();
 }
 
 /**
@@ -97,10 +98,9 @@ void ESPNOW::_scanTask() {
   }
 }
 
-
 /**
  * @brief Broadcasts Message
- * 
+ *
  * @param message_type
  * @param message
  * @param mac_address
@@ -108,7 +108,7 @@ void ESPNOW::_scanTask() {
 void ESPNOW::sendMessage() {
   String message = msg_struct.message_type + msg_struct.message + mesh.getNodeId();
   mesh.sendBroadcast(message);
-  taskSendMessage.setInterval(TASK_SECOND)
+  taskSendMessage.setInterval(1000)
 }
 
 void ESPNOW::sendSingle(uint32_t dest, ESPNOWEvent::EventType message_type, String &message_data) {
@@ -130,15 +130,15 @@ uint32_t ESPNOW::getNodeId() {
 }
 
 // Needed for painless library
-void ESPNOW::receivedCallback( uint32_t from, String &msg ) {
+void ESPNOW::receivedCallback(uint32_t from, String &msg) {
   Serial.printf("startHere: Received from %u msg=%s\n", from, msg.c_str());
 }
 
 void ESPNOW::newConnectionCallback(uint32_t nodeId) {
   Serial.printf("--> startHere: New Connection, nodeId = %u\n", nodeId);
   if (m_player.is_authoritative == true) {
-      player_state newPlayer{.nodeID = nodeId, .is_authoritative = false};
-      m_connected_players.insert(pair<uint32_t, player_state>(nodeId, newPlayer));
+    player_state newPlayer{.nodeID = nodeId, .is_authoritative = false};
+    m_connected_players.insert(pair<uint32_t, player_state>(nodeId, newPlayer));
   }
 }
 
@@ -147,8 +147,7 @@ void ESPNOW::changedConnectionCallback() {
 }
 
 void ESPNOW::nodeTimeAdjustedCallback(int32_t offset) {
-    Serial.printf("Adjusted time %u. Offset = %d\n", mesh.getNodeTime(),offset);
+  Serial.printf("Adjusted time %u. Offset = %d\n", mesh.getNodeTime(), offset);
 }
 
-
-};
+};  // namespace cs334::Client

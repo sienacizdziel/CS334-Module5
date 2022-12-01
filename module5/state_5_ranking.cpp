@@ -25,7 +25,7 @@ void RankingState::setup() {
  * the loop, indicating a transition to the "connection" state.
  */
 void RankingState::run() {
-  if (m_game->m_player.mac_address == AUTHORITY_NODE) {
+  if (m_game->m_player.is_authoritative) {
     // wait for everyone to reconnect
     // while (m_authoritative_connected_nodes.size < m_esp_client->m_connected_players.size) {};
     // then receive all the scores in a map
