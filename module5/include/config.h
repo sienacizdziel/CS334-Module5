@@ -36,7 +36,7 @@ typedef struct player_state {
   bool is_seeker;
   bool is_authoritative;
   uint16_t health;
-  uint32_t node_id;
+  bool is_winner;
 } player_state_t;
 
 };  // namespace cs334
