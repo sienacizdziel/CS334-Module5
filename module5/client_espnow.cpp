@@ -33,11 +33,12 @@ static ESPNOWEvent::esp_now_message_t msg_struct{
  * @param msg
  */
 static void pm_receivedCallback(uint32_t from, String &in) {
+  if (in == NULL) return;
   ESPNOWEvent::esp_now_message_t msg = {};
-  sprintf((char *)in.c_str(), "%u %u", &msg.message_type, &msg.message);
+  if (!sscanf((char *)in.c_str(), "%u %u", &msg.message_type, &msg.message)) return;
   switch (msg.message_type) {
     case ESPNOWEvent::EventType::ASSIGN: {
-      Serial.printf("[%u] Sent assignation: %u is the seeker", from, msg.message);
+      Serial.printf("[%u] Sent assignation: %u is the seeker\n", from, msg.message);
       if (msg.message == mesh.getNodeId()) {
         player->is_seeker = true;
       }
