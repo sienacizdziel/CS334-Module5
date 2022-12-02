@@ -24,7 +24,7 @@ namespace cs334 {
  */
 Game::Game() {
   // build our ESP and Peripherals clients, initializing both
-  Client::ESPNOW::setup(m_player.is_authoritative);
+  Client::ESPNOW::setup(&m_players, m_player.is_authoritative);
   m_peripherals_client = new Client::Peripherals();
 
   // build our base player object

@@ -90,7 +90,7 @@ static void pm_nodeTimeAdjustedCallback(int32_t offset) {
  * @param mac_address
  */
 static void pm_sendMessage() {
-  String message = msg_struct.message_type + msg_struct.message + mesh.getNodeId();
+  String message = msg_struct.message_type + " " + msg_struct.message;
   mesh.sendBroadcast(message);
   taskSendMessage.setInterval(TASK_SECOND * 1);
 }
@@ -188,7 +188,7 @@ void ESPNOW::endScan() {
  * @param message_data
  */
 void ESPNOW::sendSingle(uint32_t dest, ESPNOWEvent::EventType message_type, uint32_t message_data) {
-  String message = message_type + message_data + mesh.getNodeId();
+  String message = message_type + " " + message_data;
   mesh.sendSingle(dest, message);
 }
 

@@ -57,7 +57,7 @@ namespace ESPNOW {
  *
  * @param is_authoritative
  */
-void setup(bool is_authoritative = false);
+void setup(std::map<uint32_t, player_state_t> *p_players, bool is_authoritative = false);
 void destroy();
 
 /**
@@ -74,9 +74,10 @@ void updateScan();
  */
 void endScan();
 
-void sendSingle(uint32_t dest, ESPNOWEvent::EventType message_type, String &message_data);
-void sendBroadcast(ESPNOWEvent::EventType message_type, String &message_data);
+void sendSingle(uint32_t dest, ESPNOWEvent::EventType message_type, uint32_t message_data);
+void sendBroadcast(ESPNOWEvent::EventType message_type, uint32_t message_data);
 static void sendMessage();
+void setAcceptingNewConnections(bool val = true);
 std::list<uint32_t> getConnectedPlayers();
 uint32_t getNodeId();
 
