@@ -24,7 +24,8 @@ class Game {
   // ESP-NOW client for connecting to other players
   // Peripherals client for receiving / sending peripheral states
   Client::Peripherals *m_peripherals_client;
-  int num_initial_players = 0;
+  // keep track of the players in the current game loop.
+  std::map<uint32_t, player_state_t> m_players;
 
  private:
   // states of the game to iterate through

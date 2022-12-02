@@ -19,8 +19,8 @@
 #include <ESP8266WiFi.h>
 #endif
 
-#define MESH_PREFIX "light_game"
-#define MESH_PASSWORD "123456"
+#define MESH_PREFIX "whateverYouLike"
+#define MESH_PASSWORD "somethingSneaky"
 #define MESH_PORT 5555
 
 namespace cs334::Client {
