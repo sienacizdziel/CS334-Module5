@@ -18,8 +18,8 @@ static painlessMesh mesh;
 static Task taskSendMessage(TASK_SECOND * 1, TASK_FOREVER, &pm_sendMessage);
 static std::map<uint32_t, player_state_t> *players = NULL;
 static ESPNOWEvent::esp_now_message_t msg_struct{
-    .message_type = ESPNOWEvent::EventType::CONNECT,
-    .message = "hello world"};
+    .message_type = ESPNOWEvent::EventType::IGNORE,
+    .message = 43770};
 
 /* -------------------------------------------------------------------------- */
 /*                                  LISTENERS                                 */
@@ -31,8 +31,20 @@ static ESPNOWEvent::esp_now_message_t msg_struct{
  * @param from
  * @param msg
  */
-static void pm_receivedCallback(uint32_t from, String &msg) {
-  // Serial.printf("startHere: Received from %u msg=%s\n", from, msg.c_str());
+static void pm_receivedCallback(uint32_t from, String &in) {
+  ESPNOWEvent::esp_now_message_t msg = {};
+  sprintf((char *)in.c_str(), "%u %u", &msg.message_type, &msg.message);
+  switch (msg.message_type) {
+    case ESPNOWEvent::EventType::ASSIGN: {
+      Serial.printf("[%u] Sent assignation from: %u is the seeker", from, msg.message);
+    } break;
+    case ESPNOWEvent::EventType::HEALTH: {
+    } break;
+    case ESPNOWEvent::EventType::RANK: {
+    } break;
+    default:
+      break;
+  }
 }
 
 /**
@@ -49,7 +61,7 @@ static void pm_newConnectionCallback(uint32_t nodeId) {
         .health = 0,
         .node_id = nodeId,
     };
-    players.insert(std::pair<uint32_t, player_state>(nodeId, newPlayer));
+    players->insert(std::pair<uint32_t, player_state>(nodeId, newPlayer));
   }
 }
 
@@ -144,7 +156,6 @@ void ESPNOW::destroy() {
  */
 void ESPNOW::beginScan() {
   if (scan_task_handle != NULL) endScan();
-  connected_players.clear();
   xTaskCreate(
       pm_scanTask,
       "client_espnow SCAN",
@@ -176,7 +187,7 @@ void ESPNOW::endScan() {
  * @param message_type
  * @param message_data
  */
-void ESPNOW::sendSingle(uint32_t dest, ESPNOWEvent::EventType message_type, String &message_data) {
+void ESPNOW::sendSingle(uint32_t dest, ESPNOWEvent::EventType message_type, uint32_t message_data) {
   String message = message_type + message_data + mesh.getNodeId();
   mesh.sendSingle(dest, message);
 }
@@ -187,7 +198,7 @@ void ESPNOW::sendSingle(uint32_t dest, ESPNOWEvent::EventType message_type, Stri
  * @param message_type
  * @param message_data
  */
-void ESPNOW::sendBroadcast(ESPNOWEvent::EventType message_type, String &message_data) {
+void ESPNOW::sendBroadcast(ESPNOWEvent::EventType message_type, uint32_t message_data) {
   msg_struct.message_type = message_type;
   msg_struct.message = message_data;
 }
@@ -216,15 +227,6 @@ void ESPNOW::setAcceptingNewConnections(bool val) {
  */
 std::list<uint32_t> ESPNOW::getConnectedPlayers() {
   return mesh.getNodeList();
-}
-
-/**
- * @brief Returns all connected players
- *
- * @return std::list<uint32_t>
- */
-static std::map<uint32_t, player_state_t> ESPNOW::getPlayerMap() {
-  return connected_players;
 }
 
 /**

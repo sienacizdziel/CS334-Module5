@@ -32,9 +32,9 @@ namespace ESPNOWEvent {
  *
  */
 enum EventType {
-  CONNECT,
-  HEALTH,
   ASSIGN,
+  HEALTH,
+  RANK,
   IGNORE
 };
 
@@ -45,7 +45,7 @@ enum EventType {
  */
 typedef struct esp_now_message_t {
   EventType message_type;  // 1 byte
-  String message;
+  uint32_t message;
 } esp_now_message_t;
 
 }  // namespace ESPNOWEvent
