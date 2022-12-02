@@ -37,10 +37,19 @@ static void pm_receivedCallback(uint32_t from, String &in) {
   switch (msg.message_type) {
     case ESPNOWEvent::EventType::ASSIGN: {
       Serial.printf("[%u] Sent assignation from: %u is the seeker", from, msg.message);
+      if (msg.message == mesh.getNodeId()) {
+        m_game->m_player.is_seeker = true;
+      }
     } break;
     case ESPNOWEvent::EventType::HEALTH: {
+      if (m_player.is_authoritative == true) {
+        m_game->m_players[from].health = msg.message;
+      }
     } break;
     case ESPNOWEvent::EventType::RANK: {
+      if (msg.message == mesh.getNodeId()) {
+        m_game->m_player.is_winner = true;
+      }
     } break;
     default:
       break;
@@ -59,7 +68,7 @@ static void pm_newConnectionCallback(uint32_t nodeId) {
         .is_seeker = false,
         .is_authoritative = false,
         .health = 0,
-        .node_id = nodeId,
+        .is_winner = false,
     };
     players->insert(std::pair<uint32_t, player_state>(nodeId, newPlayer));
   }
