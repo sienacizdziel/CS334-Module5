@@ -9,13 +9,18 @@
 
 namespace cs334::Client {
 
+static void pm_sendMessage();
+
 static bool is_authoritative = false;
 static TaskHandle_t scan_task_handle = NULL;
-static std::map<uint32_t, player_state_t> connected_players;
 static Scheduler userScheduler;
 static painlessMesh mesh;
-static Task *taskSendMessage = NULL;
-static ESPNOWEvent::esp_now_message_t msg_struct;
+static Task taskSendMessage(TASK_SECOND * 1, TASK_FOREVER, &pm_sendMessage);
+static std::map<uint32_t, player_state_t> *players = NULL;
+static player_state_t *player = NULL;
+static ESPNOWEvent::esp_now_message_t msg_struct{
+    .message_type = ESPNOWEvent::EventType::IGNORE,
+    .message = 43770};
 
 /* -------------------------------------------------------------------------- */
 /*                                  LISTENERS                                 */
@@ -27,8 +32,30 @@ static ESPNOWEvent::esp_now_message_t msg_struct;
  * @param from
  * @param msg
  */
-static void pm_receivedCallback(uint32_t from, String &msg) {
-  Serial.printf("startHere: Received from %u msg=%s\n", from, msg.c_str());
+static void pm_receivedCallback(uint32_t from, String &in) {
+  if (in == NULL) return;
+  ESPNOWEvent::esp_now_message_t msg = {};
+  if (!sscanf((char *)in.c_str(), "%u %u", &msg.message_type, &msg.message)) return;
+  switch (msg.message_type) {
+    case ESPNOWEvent::EventType::ASSIGN: {
+      Serial.printf("[%u] Sent assignation: %u is the seeker\n", from, msg.message);
+      if (msg.message == mesh.getNodeId()) {
+        player->is_seeker = true;
+      }
+    } break;
+    case ESPNOWEvent::EventType::HEALTH: {
+      if (player->is_authoritative == true) {
+        (*players)[from].health = msg.message;
+      }
+    } break;
+    case ESPNOWEvent::EventType::RANK: {
+      if (msg.message == mesh.getNodeId()) {
+        player->is_winner = true;
+      }
+    } break;
+    default:
+      break;
+  }
 }
 
 /**
@@ -38,14 +65,14 @@ static void pm_receivedCallback(uint32_t from, String &msg) {
  */
 static void pm_newConnectionCallback(uint32_t nodeId) {
   Serial.printf("--> startHere: New Connection, nodeId = %u\n", nodeId);
-  if (is_authoritative == true) {
+  if (is_authoritative == true && players != NULL) {
     player_state newPlayer{
         .is_seeker = false,
         .is_authoritative = false,
         .health = 0,
-        .node_id = nodeId,
+        .is_winner = false,
     };
-    connected_players.insert(std::pair<uint32_t, player_state>(nodeId, newPlayer));
+    players->insert(std::pair<uint32_t, player_state>(nodeId, newPlayer));
   }
 }
 
@@ -63,7 +90,7 @@ static void pm_changedConnectionCallback() {
  * @param offset
  */
 static void pm_nodeTimeAdjustedCallback(int32_t offset) {
-  Serial.printf("Adjusted time %u. Offset = %d\n", mesh.getNodeTime(), offset);
+  // Serial.printf("Adjusted time %u. Offset = %d\n", mesh.getNodeTime(), offset);
 }
 
 /**
@@ -74,9 +101,9 @@ static void pm_nodeTimeAdjustedCallback(int32_t offset) {
  * @param mac_address
  */
 static void pm_sendMessage() {
-  String message = msg_struct.message_type + msg_struct.message + mesh.getNodeId();
+  String message = msg_struct.message_type + " " + msg_struct.message;
   mesh.sendBroadcast(message);
-  taskSendMessage->setInterval(TASK_SECOND);
+  taskSendMessage.setInterval(TASK_SECOND * 1);
 }
 
 /**
@@ -101,28 +128,23 @@ static void pm_scanTask(void *pvParameter) {
  *
  * Allocates the array for holding our connected player objects.
  */
-void ESPNOW::setup(bool p_is_authoritative) {
-  // prime the device for using ESP-NOW
-  WiFi.mode(WIFI_STA);
-
-  // set up the painless mesh with all the listeners
-  mesh.setDebugMsgTypes(ERROR | STARTUP);  // set before init() so that you can see startup messages
-  mesh.init(MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT);
-  mesh.onReceive(pm_receivedCallback);
-  mesh.onNewConnection(pm_newConnectionCallback);
-  mesh.onChangedConnections(pm_changedConnectionCallback);
-  mesh.onNodeTimeAdjusted(pm_nodeTimeAdjustedCallback);
-
-  // set up the message sending task
-  taskSendMessage = new Task(TASK_SECOND, TASK_FOREVER, pm_sendMessage);
-  userScheduler.addTask(*taskSendMessage);
-  taskSendMessage->enable();
-
+void ESPNOW::setup(player_state_t *p_player, std::map<uint32_t, player_state_t> *p_players, bool p_is_authoritative) {
   // sync authoritative state
   is_authoritative = p_is_authoritative;
+  players = p_players;
+  player = p_player;
 
-  // init ESP NOW
-  ESP_ERROR_CHECK(esp_now_init());
+  // prime the device for using ESP-NOW
+  // set up the painless mesh with all the listeners
+  mesh.setDebugMsgTypes(ERROR | STARTUP);
+  mesh.init(MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT);
+  mesh.onReceive(&pm_receivedCallback);
+  mesh.onChangedConnections(&pm_changedConnectionCallback);
+  mesh.onNodeTimeAdjusted(&pm_nodeTimeAdjustedCallback);
+
+  // set up the message sending task
+  userScheduler.addTask(taskSendMessage);
+  taskSendMessage.enable();
 }
 
 /**
@@ -132,7 +154,6 @@ void ESPNOW::setup(bool p_is_authoritative) {
 void ESPNOW::destroy() {
   mesh.stop();
   ESPNOW::endScan();
-  delete taskSendMessage;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -147,7 +168,6 @@ void ESPNOW::destroy() {
  */
 void ESPNOW::beginScan() {
   if (scan_task_handle != NULL) endScan();
-  connected_players.clear();
   xTaskCreate(
       pm_scanTask,
       "client_espnow SCAN",
@@ -179,8 +199,8 @@ void ESPNOW::endScan() {
  * @param message_type
  * @param message_data
  */
-void ESPNOW::sendSingle(uint32_t dest, ESPNOWEvent::EventType message_type, String &message_data) {
-  String message = message_type + message_data + mesh.getNodeId();
+void ESPNOW::sendSingle(uint32_t dest, ESPNOWEvent::EventType message_type, uint32_t message_data) {
+  String message = message_type + " " + message_data;
   mesh.sendSingle(dest, message);
 }
 
@@ -190,9 +210,22 @@ void ESPNOW::sendSingle(uint32_t dest, ESPNOWEvent::EventType message_type, Stri
  * @param message_type
  * @param message_data
  */
-void ESPNOW::sendBroadcast(ESPNOWEvent::EventType message_type, String &message_data) {
+void ESPNOW::sendBroadcast(ESPNOWEvent::EventType message_type, uint32_t message_data) {
   msg_struct.message_type = message_type;
   msg_struct.message = message_data;
+}
+
+/**
+ * @brief Sets whether or not you accept new connections
+ *
+ * @param val
+ */
+void ESPNOW::setAcceptingNewConnections(bool val) {
+  if (val) {
+    mesh.onNewConnection(&pm_newConnectionCallback);
+  } else {
+    mesh.onNewConnection(NULL);
+  }
 }
 
 /* -------------------------------------------------------------------------- */

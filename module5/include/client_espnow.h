@@ -19,8 +19,8 @@
 #include <ESP8266WiFi.h>
 #endif
 
-#define MESH_PREFIX "light_game"
-#define MESH_PASSWORD "123456"
+#define MESH_PREFIX "whateverYouLike"
+#define MESH_PASSWORD "somethingSneaky"
 #define MESH_PORT 5555
 
 namespace cs334::Client {
@@ -32,9 +32,9 @@ namespace ESPNOWEvent {
  *
  */
 enum EventType {
-  CONNECT,
-  HEALTH,
   ASSIGN,
+  HEALTH,
+  RANK,
   IGNORE
 };
 
@@ -45,7 +45,7 @@ enum EventType {
  */
 typedef struct esp_now_message_t {
   EventType message_type;  // 1 byte
-  String message;
+  uint32_t message;
 } esp_now_message_t;
 
 }  // namespace ESPNOWEvent
@@ -57,7 +57,7 @@ namespace ESPNOW {
  *
  * @param is_authoritative
  */
-void setup(bool is_authoritative = false);
+void setup(player_state_t *p_player, std::map<uint32_t, player_state_t> *p_players, bool is_authoritative = false);
 void destroy();
 
 /**
@@ -66,15 +66,18 @@ void destroy();
  */
 void beginScan();
 
+void updateScan();
+
 /**
  * @brief Ends the RTOS task scanning for ESP-NOW connections
  * This allows us to know when our m_connected_players object is ready.
  */
 void endScan();
 
-void sendSingle(uint32_t dest, ESPNOWEvent::EventType message_type, String &message_data);
-void sendBroadcast(ESPNOWEvent::EventType message_type, String &message_data);
+void sendSingle(uint32_t dest, ESPNOWEvent::EventType message_type, uint32_t message_data);
+void sendBroadcast(ESPNOWEvent::EventType message_type, uint32_t message_data);
 static void sendMessage();
+void setAcceptingNewConnections(bool val = true);
 std::list<uint32_t> getConnectedPlayers();
 uint32_t getNodeId();
 
