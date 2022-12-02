@@ -19,7 +19,7 @@ class Game {
  public:
   // the player running this instance of the game
   player_state_t m_player{
-      .is_winner = false, .is_seeker = false, .is_authoritative = true, .health = 0};
+      .is_seeker = false, .is_authoritative = true, .health = 0, .is_winner = false};
 
   // ESP-NOW client for connecting to other players
   // Peripherals client for receiving / sending peripheral states

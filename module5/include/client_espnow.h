@@ -57,7 +57,7 @@ namespace ESPNOW {
  *
  * @param is_authoritative
  */
-void setup(std::map<uint32_t, player_state_t> *p_players, bool is_authoritative = false);
+void setup(player_state_t *p_player, std::map<uint32_t, player_state_t> *p_players, bool is_authoritative = false);
 void destroy();
 
 /**

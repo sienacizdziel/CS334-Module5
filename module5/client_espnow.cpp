@@ -17,6 +17,7 @@ static Scheduler userScheduler;
 static painlessMesh mesh;
 static Task taskSendMessage(TASK_SECOND * 1, TASK_FOREVER, &pm_sendMessage);
 static std::map<uint32_t, player_state_t> *players = NULL;
+static player_state_t *player = NULL;
 static ESPNOWEvent::esp_now_message_t msg_struct{
     .message_type = ESPNOWEvent::EventType::IGNORE,
     .message = 43770};
@@ -36,19 +37,19 @@ static void pm_receivedCallback(uint32_t from, String &in) {
   sprintf((char *)in.c_str(), "%u %u", &msg.message_type, &msg.message);
   switch (msg.message_type) {
     case ESPNOWEvent::EventType::ASSIGN: {
-      Serial.printf("[%u] Sent assignation from: %u is the seeker", from, msg.message);
+      Serial.printf("[%u] Sent assignation: %u is the seeker", from, msg.message);
       if (msg.message == mesh.getNodeId()) {
-        m_game->m_player.is_seeker = true;
+        player->is_seeker = true;
       }
     } break;
     case ESPNOWEvent::EventType::HEALTH: {
-      if (m_player.is_authoritative == true) {
-        m_game->m_players[from].health = msg.message;
+      if (player->is_authoritative == true) {
+        (*players)[from].health = msg.message;
       }
     } break;
     case ESPNOWEvent::EventType::RANK: {
       if (msg.message == mesh.getNodeId()) {
-        m_game->m_player.is_winner = true;
+        player->is_winner = true;
       }
     } break;
     default:
@@ -126,10 +127,11 @@ static void pm_scanTask(void *pvParameter) {
  *
  * Allocates the array for holding our connected player objects.
  */
-void ESPNOW::setup(std::map<uint32_t, player_state_t> *p_players, bool p_is_authoritative) {
+void ESPNOW::setup(player_state_t *p_player, std::map<uint32_t, player_state_t> *p_players, bool p_is_authoritative) {
   // sync authoritative state
   is_authoritative = p_is_authoritative;
   players = p_players;
+  player = p_player;
 
   // prime the device for using ESP-NOW
   // set up the painless mesh with all the listeners

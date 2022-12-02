@@ -14,30 +14,32 @@ namespace cs334 {
  * initialization information (i.e. whether or not one is the seeker)
  */
 void InitializationState::setup() {
-  Serial.printf("STATE: Initialization");
+  Serial.println("STATE: Initialization");
   // start calibrating the photoresistors
   m_game->m_peripherals_client->beginPhotoresistorCalibration();
 
-  // get the list of players in the game, which is set now
-  long seeker_i = random(0, m_game->m_players.size() + 1);
-  uint32_t seeker_id;
-  // if we picked ourselves, we are the seeker
-  if (seeker_i == m_game->m_players.size()) {
-    seeker_id = Client::ESPNOW::getNodeId();
-    m_game->m_player.is_seeker = true;
-    // otherwise, randomly select our seeker based on seeker_i
-  } else {
-    auto iter_players = m_game->m_players.begin();
-    std::advance(iter_players, seeker_i);
-    seeker_id = iter_players->first;
-  }
-  // now broadcast who the seeker is to all nodes in the mesh so they can know
-  Client::ESPNOW::sendBroadcast(Client::ESPNOWEvent::EventType::ASSIGN, seeker_id);
-
-  // set the initialization LED color
+  // authoritative player now sets up the game
   if (m_game->m_player.is_authoritative) {
+    // set the color of the LED
     m_game->m_peripherals_client->setLED(255, 255, 0);  // yellow
+    // get the list of players in the game, which is set now
+    long seeker_i = random(0, m_game->m_players.size() + 1);
+    uint32_t seeker_id;
+    // if we picked ourselves, we are the seeker
+    if (seeker_i == m_game->m_players.size()) {
+      seeker_id = Client::ESPNOW::getNodeId();
+      m_game->m_player.is_seeker = true;
+      // otherwise, randomly select our seeker based on seeker_i
+    } else {
+      auto iter_players = m_game->m_players.begin();
+      std::advance(iter_players, seeker_i);
+      seeker_id = iter_players->first;
+    }
+    Serial.printf("Seeker: %d = %u\n", seeker_i, seeker_id);
+    // now broadcast who the seeker is to all nodes in the mesh so they can know
+    Client::ESPNOW::sendBroadcast(Client::ESPNOWEvent::EventType::ASSIGN, seeker_id);
   } else {
+    // otherwise blue LED
     m_game->m_peripherals_client->setLED(0, 0, 255);  // blue
   }
 }

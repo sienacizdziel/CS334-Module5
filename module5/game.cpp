@@ -24,12 +24,8 @@ namespace cs334 {
  */
 Game::Game() {
   // build our ESP and Peripherals clients, initializing both
-  Client::ESPNOW::setup(&m_players, m_player.is_authoritative);
+  Client::ESPNOW::setup(&m_player, &m_players, m_player.is_authoritative);
   m_peripherals_client = new Client::Peripherals();
-
-  // build our base player object
-  // get our nodeID dynamically (UNTESTED)
-  m_player.node_id = Client::ESPNOW::getNodeId();
 
   // add all of the states in order to the m_states vector
   m_states.push_back(new ConnectionState(this));
