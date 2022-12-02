@@ -12,7 +12,7 @@ namespace cs334 {
  * of the game to the correct values based on if it's a seeker or authoritative.
  */
 void PlayTimerState::setup() {
-  Serial.println("play timer state setup");
+  Serial.println("STATE: Play Timer");
   if (m_game->m_player.is_seeker) {
     m_game->m_peripherals_client->setLED(0, 255, 0);  // green (seeker)
   } else {
@@ -38,7 +38,7 @@ void PlayTimerState::run() {
     // TODO possibly update LED flashing rate or brightness to indicate loss in health
 
     // if we've been playing for the total match time, move on to the next state
-    if ((start - millis()) > (TIME_PLAYING_SECONDS * 1000)) {
+    if ((millis() - start) > (TIME_PLAYING_SECONDS * 1000)) {
       break;
     }
 

@@ -20,7 +20,7 @@
 #define PIN_LED_B (2)
 
 // Game settings
-#define TIME_HIDING_SECONDS (300)
+#define TIME_HIDING_SECONDS (60)
 #define TIME_PLAYING_SECONDS (300)
 
 /* -------------------------------------------------------------------------- */

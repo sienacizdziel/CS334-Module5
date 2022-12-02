@@ -11,7 +11,7 @@ namespace cs334 {
  * Set the LED state to white, and save a reference to the current time.
  */
 void HideTimerState::setup() {
-  Serial.println("hide timer state setup");
+  Serial.println("STATE: Hide Timer");
   // start = std::chrono::system_clock::now();
   m_game->m_peripherals_client->setLED(255, 255, 255); // white
 }
@@ -25,6 +25,7 @@ void HideTimerState::setup() {
  */
 void HideTimerState::run() {
   // delay for the hide timer MS
+  Serial.println("hiding");
   delay(TIME_HIDING_SECONDS * 1000);
   // while (true) {
   //   // get the current system clock time
