@@ -56,7 +56,7 @@ static void pm_receivedCallback(uint32_t from, String &in) {
       if (msg.message == mesh.getNodeId()) {
         player->is_winner = true;
       }
-      has_seeker = true;
+      has_rank = true;
     } break;
     case ESPNOWEvent::EventType::BEGIN_GAME: {
       begin_game = true;
