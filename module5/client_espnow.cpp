@@ -18,6 +18,8 @@ static painlessMesh mesh;
 static Task taskSendMessage(TASK_SECOND * 1, TASK_FOREVER, &pm_sendMessage);
 static std::map<uint32_t, player_state_t> *players = NULL;
 static player_state_t *player = NULL;
+static bool has_seeker = false;
+static bool begin_game = false;
 static ESPNOWEvent::esp_now_message_t msg_struct{
     .message_type = ESPNOWEvent::EventType::IGNORE,
     .message = 43770};
@@ -42,6 +44,7 @@ static void pm_receivedCallback(uint32_t from, String &in) {
       if (msg.message == mesh.getNodeId()) {
         player->is_seeker = true;
       }
+      has_seeker = true;
     } break;
     case ESPNOWEvent::EventType::HEALTH: {
       if (player->is_authoritative == true) {
@@ -52,6 +55,9 @@ static void pm_receivedCallback(uint32_t from, String &in) {
       if (msg.message == mesh.getNodeId()) {
         player->is_winner = true;
       }
+    } break;
+    case ESPNOWEvent::EventType::BEGIN_GAME: {
+      begin_game = true;
     } break;
     default:
       break;
@@ -132,6 +138,7 @@ static void pm_scanTask(void *pvParameter) {
 void ESPNOW::setup(player_state_t *p_player, std::map<uint32_t, player_state_t> *p_players, bool p_is_authoritative) {
   // sync authoritative state
   is_authoritative = p_is_authoritative;
+  has_seeker = false;
   players = p_players;
   player = p_player;
 
@@ -233,6 +240,26 @@ void ESPNOW::setAcceptingNewConnections(bool val) {
 /* -------------------------------------------------------------------------- */
 /*                                   HELPERS                                  */
 /* -------------------------------------------------------------------------- */
+
+/**
+ * @brief Checks whether or not the ESP-NOW has received the seeker message
+ *
+ * @return true
+ * @return false
+ */
+bool ESPNOW::hasSeeker() {
+  return has_seeker;
+}
+
+/**
+ * @brief Checks whether or not the ESP-NOW has received the begin_game message
+ *
+ * @return true
+ * @return false
+ */
+bool ESPNOW::shouldBeginGame() {
+  return begin_game;
+}
 
 /**
  * @brief Returns all connected players

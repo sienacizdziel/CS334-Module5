@@ -50,9 +50,23 @@ void InitializationState::setup() {
  * the loop, indicating a transition to the "hide timer" state.
  */
 void InitializationState::run() {
-  // continually check the button press duration while initializing
-  while (!m_game->m_peripherals_client->checkButtonPressDuration(5000)) {
-    m_game->m_peripherals_client->update();
+  // if authoritative
+  if (m_game->m_player.is_authoritative) {
+    //  loop until button press
+    while (!m_game->m_peripherals_client->checkButtonPressDuration(5000)) {
+      m_game->m_peripherals_client->update();
+    }
+    // if non-authoritative
+  } else {
+    // loop until seeker has been assigned
+    while (!Client::ESPNOW::hasSeeker()) {
+      m_game->m_peripherals_client->update();
+    }
+    // flash yellow while waiting for authority to start
+    m_game->m_peripherals_client->setLED(255, 255, 0, 500);  // flashing yellow
+    while (!Client::ESPNOW::shouldBeginGame()) {
+      m_game->m_peripherals_client->update();
+    }
   }
   // once ready, turn off ESP-NOW mesh
   Client::ESPNOW::endScan();

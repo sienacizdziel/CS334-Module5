@@ -13,7 +13,7 @@ namespace cs334 {
  */
 void HideTimerState::setup() {
   Serial.println("[STATE] Began (3) Hide Timer.");
-  m_game->m_peripherals_client->setLED(255, 255, 255);  // white
+  m_game->m_peripherals_client->setLED(255, 255, 255, 500);  // blinking white
 }
 
 /**
@@ -27,8 +27,11 @@ void HideTimerState::run() {
   // delay for the hide timer MS
   auto start = std::chrono::system_clock::now();
   while (true) {
+    // get the current system clock time
+    auto curr = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = curr - start;
     // if the timer was exceeded, move to the next state
-    if ((std::chrono::system_clock::now() - start).count() >= TIME_HIDING_SECONDS)
+    if (elapsed_seconds.count() >= TIME_HIDING_SECONDS)
       break;
     // check every 0.1s
     delay(100);

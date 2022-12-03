@@ -30,19 +30,20 @@ void PlayTimerState::setup() {
  * to accumulate in the game's player health member variable.
  */
 void PlayTimerState::run() {
+  // delay for the hide timer MS
+  auto start = std::chrono::system_clock::now();
   while (true) {
-    // add photoresistor damage to player's accumulated health
-    // TODO potentially add a multiplier for higher values (direct flashlight contact)
+    // update the peripherals (LEDs mostly)
+    m_game->m_peripherals_client->update();
+    // update photoresistor health
     m_game->m_player.health += m_game->m_peripherals_client->getPhotoresistorInput();
-
-    // TODO possibly update LED flashing rate or brightness to indicate loss in health
-
-    // if we've been playing for the total match time, move on to the next state
-    if ((millis() - start) > (TIME_PLAYING_SECONDS * 1000)) {
+    // get the current system clock time
+    auto curr = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = curr - start;
+    // if the timer was exceeded, move to the next state
+    if (elapsed_seconds.count() >= TIME_PLAYING_SECONDS)
       break;
-    }
-
-    // adjust the delay to speed up or slow down damage
+    // check every 0.1s
     delay(100);
   }
 }

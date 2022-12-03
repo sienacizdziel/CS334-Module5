@@ -35,6 +35,7 @@ enum EventType {
   ASSIGN,
   HEALTH,
   RANK,
+  BEGIN_GAME,
   IGNORE
 };
 
@@ -80,6 +81,9 @@ static void sendMessage();
 void setAcceptingNewConnections(bool val = true);
 std::list<uint32_t> getConnectedPlayers();
 uint32_t getNodeId();
+
+bool hasSeeker();
+bool shouldBeginGame();
 
 }  // namespace ESPNOW
 
