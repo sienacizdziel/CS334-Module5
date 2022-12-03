@@ -179,11 +179,10 @@ bool Peripherals::checkButtonPressDuration(uint32_t duration) {
  */
 uint32_t Peripherals::getPhotoresistorInput() {
   // sum up the inputs from all photoresistors, from 0-1
-  float value = 0;
+  uint32_t value = 0;
   for (const auto &photoresistor : m_photoresistors) {
     value += map(analogRead(photoresistor.pin), photoresistor.low,
-                 photoresistor.high, 0, 100) /
-             100.f;
+                 photoresistor.high, 0, 100);
   }
   // return the average photoresistor value
   return value / m_photoresistors.size();

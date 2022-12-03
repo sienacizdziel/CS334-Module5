@@ -28,6 +28,7 @@ void HideTimerState::run() {
   auto start = std::chrono::system_clock::now();
   while (true) {
     // get the current system clock time
+    m_game->m_peripherals_client->update();
     auto curr = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = curr - start;
     // if the timer was exceeded, move to the next state

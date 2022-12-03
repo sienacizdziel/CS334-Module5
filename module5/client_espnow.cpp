@@ -20,6 +20,7 @@ static std::map<uint32_t, player_state_t> *players = NULL;
 static player_state_t *player = NULL;
 static bool has_seeker = false;
 static bool begin_game = false;
+static bool has_rank = false;
 static ESPNOWEvent::esp_now_message_t msg_struct{
     .message_type = ESPNOWEvent::EventType::IGNORE,
     .message = 43770};
@@ -55,6 +56,7 @@ static void pm_receivedCallback(uint32_t from, String &in) {
       if (msg.message == mesh.getNodeId()) {
         player->is_winner = true;
       }
+      has_seeker = true;
     } break;
     case ESPNOWEvent::EventType::BEGIN_GAME: {
       begin_game = true;
@@ -139,6 +141,8 @@ void ESPNOW::setup(player_state_t *p_player, std::map<uint32_t, player_state_t> 
   // sync authoritative state
   is_authoritative = p_is_authoritative;
   has_seeker = false;
+  begin_game = false;
+  has_rank = false;
   players = p_players;
   player = p_player;
 
@@ -153,6 +157,9 @@ void ESPNOW::setup(player_state_t *p_player, std::map<uint32_t, player_state_t> 
   // set up the message sending task
   userScheduler.addTask(taskSendMessage);
   taskSendMessage.enable();
+
+  // log own node id
+  Serial.printf("[ESP-NOW] Device node id: %u\n", mesh.getNodeId());
 }
 
 /**
@@ -249,6 +256,16 @@ void ESPNOW::setAcceptingNewConnections(bool val) {
  */
 bool ESPNOW::hasSeeker() {
   return has_seeker;
+}
+
+/**
+ * @brief Checks whether or not the ESP-NOW has received the rank message
+ *
+ * @return true
+ * @return false
+ */
+bool ESPNOW::hasRank() {
+  return has_rank;
 }
 
 /**

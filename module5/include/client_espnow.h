@@ -83,6 +83,7 @@ std::list<uint32_t> getConnectedPlayers();
 uint32_t getNodeId();
 
 bool hasSeeker();
+bool hasRank();
 bool shouldBeginGame();
 
 }  // namespace ESPNOW

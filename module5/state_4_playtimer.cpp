@@ -46,6 +46,8 @@ void PlayTimerState::run() {
     // check every 0.1s
     delay(100);
   }
+  // Once done, print out the health
+  Serial.printf("[STATUS] Finished play state with health: %u\n", m_game->m_player.health);
 }
 
 }  // namespace cs334

@@ -56,7 +56,7 @@ void Game::loop() {
     state->setup();
     state->run();
   }
-  Serial.println("[GAME] Finished! Playing again...");
+  Serial.println("[GAME] Playing again...");
 }
 
 };  // namespace cs334

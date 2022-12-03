@@ -20,8 +20,8 @@
 #define PIN_LED_B (2)
 
 // Game settings
-#define TIME_HIDING_SECONDS (60)
-#define TIME_PLAYING_SECONDS (300)
+#define TIME_HIDING_SECONDS (10)
+#define TIME_PLAYING_SECONDS (30)
 
 /* -------------------------------------------------------------------------- */
 /*                                   TYPING                                   */
@@ -35,7 +35,7 @@ namespace cs334 {
 typedef struct player_state {
   bool is_seeker;
   bool is_authoritative;
-  uint16_t health;
+  uint32_t health;
   bool is_winner;
 } player_state_t;
 
