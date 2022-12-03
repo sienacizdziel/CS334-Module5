@@ -14,8 +14,8 @@ namespace cs334 {
  * by the ESP-NOW client. Set the LED here to blink blue here as well.
  */
 void ConnectionState::setup() {
-  Serial.println("STATE: Connection");
-  m_game->m_peripherals_client->setLED(0, 0, 255);  // blinking blue
+  Serial.println("[STATE] Began (1) Connection.");
+  m_game->m_peripherals_client->setLED(0, 0, 255, 500);  // blinking blue
   m_game->m_players.clear();
   Client::ESPNOW::beginScan();
   Client::ESPNOW::setAcceptingNewConnections(true);
@@ -28,10 +28,11 @@ void ConnectionState::setup() {
  * the loop, indicating a transition to the "initialization" state.
  */
 void ConnectionState::run() {
-  while (m_game->m_peripherals_client->m_button_press_duration < 5.f) {
-    delay(10);
+  // continually check the button press duration while connecting
+  while (!m_game->m_peripherals_client->checkButtonPressDuration(5000)) {
+    m_game->m_peripherals_client->update();
   }
-  // turn off accepting of new connections
+  // once ready to move on, turn off accepting of new connections
   Client::ESPNOW::setAcceptingNewConnections(false);
 }
 

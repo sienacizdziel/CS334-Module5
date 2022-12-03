@@ -51,11 +51,12 @@ Game::~Game() {
  *
  */
 void Game::loop() {
-  Serial.println("Game started!");
+  Serial.println("\n[GAME] Started!");
   for (const auto &state : m_states) {
     state->setup();
     state->run();
   }
+  Serial.println("[GAME] Finished! Playing again...");
 }
 
 };  // namespace cs334

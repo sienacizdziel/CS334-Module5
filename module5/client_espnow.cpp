@@ -38,7 +38,7 @@ static void pm_receivedCallback(uint32_t from, String &in) {
   if (!sscanf((char *)in.c_str(), "%u %u", &msg.message_type, &msg.message)) return;
   switch (msg.message_type) {
     case ESPNOWEvent::EventType::ASSIGN: {
-      Serial.printf("[%u] Sent assignation: %u is the seeker\n", from, msg.message);
+      Serial.printf("[ESP-NOW] Received message from %u: the seeker is %u\n", from, msg.message);
       if (msg.message == mesh.getNodeId()) {
         player->is_seeker = true;
       }
@@ -101,8 +101,9 @@ static void pm_nodeTimeAdjustedCallback(int32_t offset) {
  * @param mac_address
  */
 static void pm_sendMessage() {
-  String message = msg_struct.message_type + " " + msg_struct.message;
-  mesh.sendBroadcast(message);
+  char msg[64];
+  sprintf(msg, "%d %u", msg_struct.message_type, msg_struct.message);
+  mesh.sendBroadcast(msg);
   taskSendMessage.setInterval(TASK_SECOND * 1);
 }
 
@@ -211,6 +212,7 @@ void ESPNOW::sendSingle(uint32_t dest, ESPNOWEvent::EventType message_type, uint
  * @param message_data
  */
 void ESPNOW::sendBroadcast(ESPNOWEvent::EventType message_type, uint32_t message_data) {
+  Serial.printf("[ESP-NOW] Set broadcast to: %d %u\n", message_type, message_data);
   msg_struct.message_type = message_type;
   msg_struct.message = message_data;
 }

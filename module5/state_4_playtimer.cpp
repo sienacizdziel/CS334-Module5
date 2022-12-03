@@ -12,7 +12,7 @@ namespace cs334 {
  * of the game to the correct values based on if it's a seeker or authoritative.
  */
 void PlayTimerState::setup() {
-  Serial.println("STATE: Play Timer");
+  Serial.println("[STATE] Began (4) Play Timer.");
   if (m_game->m_player.is_seeker) {
     m_game->m_peripherals_client->setLED(0, 255, 0);  // green (seeker)
   } else {

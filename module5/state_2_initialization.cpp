@@ -14,9 +14,8 @@ namespace cs334 {
  * initialization information (i.e. whether or not one is the seeker)
  */
 void InitializationState::setup() {
-  Serial.println("STATE: Initialization");
+  Serial.println("[STATE] Began (2) Initialization.");
   // start calibrating the photoresistors
-  m_game->m_peripherals_client->beginPhotoresistorCalibration();
 
   // authoritative player now sets up the game
   if (m_game->m_player.is_authoritative) {
@@ -35,12 +34,12 @@ void InitializationState::setup() {
       std::advance(iter_players, seeker_i);
       seeker_id = iter_players->first;
     }
-    Serial.printf("Seeker: %d = %u\n", seeker_i, seeker_id);
+    Serial.printf("[AUTHORITATIVE] Seeker: %d = %u\n", seeker_i, seeker_id);
     // now broadcast who the seeker is to all nodes in the mesh so they can know
     Client::ESPNOW::sendBroadcast(Client::ESPNOWEvent::EventType::ASSIGN, seeker_id);
   } else {
-    // otherwise blue LED
-    m_game->m_peripherals_client->setLED(0, 0, 255);  // blue
+    // otherwise blue LED, currently listening for seeker assignment
+    m_game->m_peripherals_client->setLED(0, 0, 255);  // steady blue
   }
 }
 
@@ -51,9 +50,11 @@ void InitializationState::setup() {
  * the loop, indicating a transition to the "hide timer" state.
  */
 void InitializationState::run() {
-  while (m_game->m_peripherals_client->m_button_press_duration < 5.f) {
-    delay(10);
+  // continually check the button press duration while initializing
+  while (!m_game->m_peripherals_client->checkButtonPressDuration(5000)) {
+    m_game->m_peripherals_client->update();
   }
+  // once ready, turn off ESP-NOW mesh
   Client::ESPNOW::endScan();
 }
 

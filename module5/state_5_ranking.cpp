@@ -12,7 +12,7 @@ namespace cs334 {
  *
  */
 void RankingState::setup() {
-  Serial.println("ranking state setup");
+  Serial.println("[STATE] Began (5) Ranking.");
   m_game->m_peripherals_client->setLED(255, 0, 255);  // purple
 }
 
