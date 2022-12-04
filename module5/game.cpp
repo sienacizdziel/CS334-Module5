@@ -54,7 +54,6 @@ Game::~Game() {
  */
 void Game::loop() {
   Serial.println("\n[GAME] Started!");
-  Serial.printf("[GAME] ESP is authority: %s\n", m_player.is_authoritative ? "TRUE" : "FALSE");
   for (const auto &state : m_states) {
     state->setup();
     state->run();

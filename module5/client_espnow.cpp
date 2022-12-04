@@ -175,6 +175,7 @@ void ESPNOW::destroy() {
  */
 void ESPNOW::setIsAuthoritative(bool val) {
   is_authoritative = val;
+  Serial.printf("[ESP-NOW] ESP is authority: %s\n", m_player.is_authoritative ? "TRUE" : "FALSE");
 }
 
 /* -------------------------------------------------------------------------- */
