@@ -29,7 +29,7 @@ void ConnectionState::setup() {
  */
 void ConnectionState::run() {
   // continually check the button press duration while connecting
-  while (!m_game->m_peripherals_client->checkButtonPressDuration(5000)) {
+  while (!m_game->m_peripherals_client->checkButtonPressDuration(BUTTON_PRESS_DUR_MS)) {
     m_game->m_peripherals_client->update();
   }
   // once ready to move on, turn off accepting of new connections

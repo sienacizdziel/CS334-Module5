@@ -11,6 +11,9 @@
 #define MAX_PLAYERS_N (10)
 #define AUTHORITY_NODE 3267568281U
 
+// Button press duration
+#define BUTTON_PRESS_DUR_MS (3000)
+
 // GPIO pins of each peripheral
 #define PIN_PHOTORESISTOR_1 (36)
 #define PIN_PHOTORESISTOR_2 (39)

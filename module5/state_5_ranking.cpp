@@ -79,7 +79,7 @@ void RankingState::run() {
   else
     m_game->m_peripherals_client->setLED(127, 127, 0);
   Serial.println("[GAME] Finished.");
-  while (!m_game->m_peripherals_client->checkButtonPressDuration(5000)) {
+  while (!m_game->m_peripherals_client->checkButtonPressDuration(BUTTON_PRESS_DUR_MS)) {
     m_game->m_peripherals_client->update();
   }
 }

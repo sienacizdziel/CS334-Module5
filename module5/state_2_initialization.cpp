@@ -39,7 +39,7 @@ void InitializationState::setup() {
     Client::ESPNOW::sendBroadcast(Client::ESPNOWEvent::EventType::ASSIGN, seeker_id);
   } else {
     // otherwise blue LED, currently listening for seeker assignment
-    m_game->m_peripherals_client->setLED(0, 0, 255);  // steady blue
+    m_game->m_peripherals_client->setLED(255, 255, 0);  // steady yellow
   }
 }
 
@@ -53,7 +53,7 @@ void InitializationState::run() {
   // if authoritative
   if (m_game->m_player.is_authoritative) {
     //  loop until button press
-    while (!m_game->m_peripherals_client->checkButtonPressDuration(5000)) {
+    while (!m_game->m_peripherals_client->checkButtonPressDuration(BUTTON_PRESS_DUR_MS)) {
       m_game->m_peripherals_client->update();
     }
     Client::ESPNOW::sendBroadcast(Client::ESPNOWEvent::EventType::BEGIN_GAME, 0);
@@ -63,9 +63,9 @@ void InitializationState::run() {
     while (!Client::ESPNOW::hasSeeker()) {
       m_game->m_peripherals_client->update();
     }
-    // flash yellow while waiting for authority to start
-    m_game->m_peripherals_client->setLED(255, 255, 0, 500);  // flashing yellow
-    while (!Client::ESPNOW::shouldBeginGame()) {
+    // hold yellow while waiting for authority to start
+    m_game->m_peripherals_client->setLED(255, 255, 0);  // flashing yellow
+    while (!m_game->m_peripherals_client->checkButtonPressDuration(BUTTON_PRESS_DUR_MS)) {
       m_game->m_peripherals_client->update();
     }
   }

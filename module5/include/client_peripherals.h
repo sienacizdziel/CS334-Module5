@@ -78,7 +78,7 @@ class Peripherals {
    *
    * @return true iff the button has been pressed for that long
    */
-  bool checkButtonPressDuration(uint32_t duration = 5000);
+  bool checkButtonPressDuration(uint32_t duration = BUTTON_PRESS_DUR_MS);
 
  private:
   /* ----------------------------- TASK SCHEDULING ---------------------------- */

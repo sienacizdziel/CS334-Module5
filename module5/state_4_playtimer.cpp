@@ -14,9 +14,9 @@ namespace cs334 {
 void PlayTimerState::setup() {
   Serial.println("[STATE] Began (4) Play Timer.");
   if (m_game->m_player.is_seeker) {
-    m_game->m_peripherals_client->setLED(0, 255, 0);  // green (seeker)
+    m_game->m_peripherals_client->setLED(255, 0, 0);  // red (seeker)
   } else {
-    m_game->m_peripherals_client->setLED(255, 0, 0);  // red (hider)
+    m_game->m_peripherals_client->setLED(0, 255, 0);  // green (hider)
   }
   m_game->m_player.health = 0;
   start = millis();
