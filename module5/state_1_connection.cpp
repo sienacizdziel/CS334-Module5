@@ -39,7 +39,7 @@ void ConnectionState::run() {
       player_state newPlayer{
           .is_seeker = false,
           .is_authoritative = false,
-          .health = 0,
+          .health = 1,
           .is_winner = false,
       };
       m_game->m_players.insert({connection, newPlayer});

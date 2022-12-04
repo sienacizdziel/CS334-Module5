@@ -23,8 +23,10 @@ void RankingState::setup() {
   }
   // set broadcast to finalized health. if we were the seeker, make the health
   // the maximum possibel value (effectively removing us from the ranking)
-  uint32_t health = m_game->m_player.is_seeker ? INFINITY : m_game->m_player.health;
-  Client::ESPNOW::sendBroadcast(Client::ESPNOWEvent::EventType::HEALTH, health);
+  if (m_game->m_player.is_seeker) m_game->m_player.health = INFINITY;
+  Client::ESPNOW::sendBroadcast(Client::ESPNOWEvent::EventType::HEALTH, m_game->m_player.health);
+  Serial.printf("[AUTHORITATIVE] Listening for health from %d other players\n", m_game->m_players.size());
+  Serial.printf("[AUTHORITATIVE] Current nodes in network: %d\n", Client::ESPNOW::getConnectedPlayers().size() + 1);
 }
 
 /**
@@ -47,7 +49,7 @@ void RankingState::run() {
       n_players_with_health = 0;
       std::map<uint32_t, player_state_t>::iterator it;
       for (it = m_game->m_players.begin(); it != m_game->m_players.end(); it++) {
-        if (it->second.health > 0) n_players_with_health++;
+        if (it->second.health != 1) n_players_with_health++;
         // note we do the ranking logic here as well
         if (it->second.health < winner_health) {
           winner = it->first;
@@ -57,12 +59,18 @@ void RankingState::run() {
       // Serial.printf("[DEBUG] curr: %d, max: %d", n_players_with_health, m_game->m_players.size());
     } while (n_players_with_health != m_game->m_players.size());
     // check if ourself is winner
-    if (m_game->m_player.health < winner_health) {
+    if (!m_game->m_player.is_seeker && m_game->m_player.health < winner_health) {
       winner = Client::ESPNOW::getNodeId();
       winner_health = m_game->m_player.health;
       m_game->m_player.is_winner = true;
     }
-    Serial.printf("[AUTHORITATIVE] Winner: %u at %u health\n", winner, winner_health);
+    // print each player's health
+    std::map<uint32_t, player_state_t>::iterator it;
+    for (it = m_game->m_players.begin(); it != m_game->m_players.end(); it++) {
+      Serial.printf("[AUTHORITATIVE] Player %u: %u health\n", it->first, it->second.health);
+    }
+    Serial.printf("[AUTHORITATIVE] Player %u: %u health\n", Client::ESPNOW::getNodeId(), m_game->m_player.health);
+    Serial.printf("[AUTHORITATIVE] WINNER: %u at %u health\n", winner, winner_health);
     // finally, broadcast the winner to all other ESPs
     Client::ESPNOW::sendBroadcast(Client::ESPNOWEvent::EventType::RANK, winner);
   } else {  // if non-authoritative

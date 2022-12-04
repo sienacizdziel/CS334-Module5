@@ -72,7 +72,7 @@ static void pm_receivedCallback(uint32_t from, String &in) {
  * @param nodeId
  */
 static void pm_newConnectionCallback(uint32_t nodeId) {
-  Serial.printf("[ESP-NOW] New Connection, nodeId = %u\n", nodeId);
+  Serial.printf("[ESP-NOW] New Connection, nodeId = %u, nodes in network: %d\n", nodeId, mesh.getNodeList(true).size());
   // if (is_authoritative == true && players != NULL) {
   //   player_state newPlayer{
   //       .is_seeker = false,
@@ -90,7 +90,7 @@ static void pm_newConnectionCallback(uint32_t nodeId) {
  *
  */
 static void pm_changedConnectionCallback() {
-  Serial.printf("[ESP-NOW] Connections changed\n");
+  Serial.printf("[ESP-NOW] Connections changed, nodes in network: %d\n", mesh.getNodeList(true).size());
 }
 
 /**
