@@ -93,6 +93,8 @@ void RankingState::run() {
   while (!m_game->m_peripherals_client->checkButtonPressDuration(BUTTON_PRESS_DUR_MS)) {
     m_game->m_peripherals_client->update();
   }
+  // restart the ESP
+  ESP.restart();
 }
 
 }  // namespace cs334
