@@ -70,7 +70,7 @@ void InitializationState::run() {
     }
   }
   // once ready, turn off ESP-NOW mesh
-  Client::ESPNOW::endScan();
+  // Client::ESPNOW::endScan();
 }
 
 }  // namespace cs334

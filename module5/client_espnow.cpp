@@ -72,16 +72,17 @@ static void pm_receivedCallback(uint32_t from, String &in) {
  * @param nodeId
  */
 static void pm_newConnectionCallback(uint32_t nodeId) {
-  Serial.printf("--> startHere: New Connection, nodeId = %u\n", nodeId);
-  if (is_authoritative == true && players != NULL) {
-    player_state newPlayer{
-        .is_seeker = false,
-        .is_authoritative = false,
-        .health = 0,
-        .is_winner = false,
-    };
-    players->insert(std::pair<uint32_t, player_state>(nodeId, newPlayer));
-  }
+  Serial.printf("[ESP-NOW] New Connection, nodeId = %u\n", nodeId);
+  // if (is_authoritative == true && players != NULL) {
+  //   player_state newPlayer{
+  //       .is_seeker = false,
+  //       .is_authoritative = false,
+  //       .health = 0,
+  //       .is_winner = false,
+  //   };
+  //   players->insert({nodeId, newPlayer});
+  //   Serial.printf("[AUTHORITATIVE] Added connection, nodeId = %u (new size: %d)\n", nodeId, players->size());
+  // }
 }
 
 /**
@@ -89,7 +90,7 @@ static void pm_newConnectionCallback(uint32_t nodeId) {
  *
  */
 static void pm_changedConnectionCallback() {
-  Serial.printf("Changed connections\n");
+  Serial.printf("[ESP-NOW] Connections changed\n");
 }
 
 /**
@@ -142,8 +143,8 @@ void ESPNOW::setup(player_state_t *p_player, std::map<uint32_t, player_state_t> 
   has_seeker = false;
   begin_game = false;
   has_rank = false;
-  players = p_players;
   player = p_player;
+  players = p_players;
 
   // prime the device for using ESP-NOW
   // set up the painless mesh with all the listeners

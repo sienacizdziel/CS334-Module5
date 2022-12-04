@@ -11,8 +11,8 @@ namespace cs334 {
  */
 void RankingState::setup() {
   Serial.println("[STATE] Began (5) Ranking.");
-  Client::ESPNOW::beginScan();
-  Client::ESPNOW::setAcceptingNewConnections(true);
+  // Client::ESPNOW::beginScan();
+  // Client::ESPNOW::setAcceptingNewConnections(true);
   // if authoritative
   if (m_game->m_player.is_authoritative) {
     // set the color to a solid purple
@@ -54,6 +54,7 @@ void RankingState::run() {
           winner_health = it->second.health;
         }
       }
+      // Serial.printf("[DEBUG] curr: %d, max: %d", n_players_with_health, m_game->m_players.size());
     } while (n_players_with_health != m_game->m_players.size());
     // check if ourself is winner
     if (m_game->m_player.health < winner_health) {
