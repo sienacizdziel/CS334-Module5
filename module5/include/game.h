@@ -20,7 +20,7 @@ class Game {
   // the player running this instance of the game
   player_state_t m_player{
       .is_seeker = false,
-      .is_authoritative = true,
+      .is_authoritative = false,
       .health = 0,
       .is_winner = false};
 

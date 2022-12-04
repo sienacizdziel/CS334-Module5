@@ -8,8 +8,6 @@ namespace cs334 {
 
 /**
  * @brief Set up the ranking state
- *
- *
  */
 void RankingState::setup() {
   Serial.println("[STATE] Began (5) Ranking.");
@@ -23,8 +21,10 @@ void RankingState::setup() {
     // other players turn to a flashing purple
     m_game->m_peripherals_client->setLED(255, 0, 255, 500);  // flashing purple
   }
-  // set broadcast to finalized health
-  Client::ESPNOW::sendBroadcast(Client::ESPNOWEvent::EventType::HEALTH, m_game->m_player.health);
+  // set broadcast to finalized health. if we were the seeker, make the health
+  // the maximum possibel value (effectively removing us from the ranking)
+  uint32_t health = m_game->m_player.is_seeker ? INFINITY : m_game->m_player.health;
+  Client::ESPNOW::sendBroadcast(Client::ESPNOWEvent::EventType::HEALTH, health);
 }
 
 /**

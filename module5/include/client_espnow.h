@@ -58,15 +58,15 @@ namespace ESPNOW {
  *
  * @param is_authoritative
  */
-void setup(player_state_t *p_player, std::map<uint32_t, player_state_t> *p_players, bool is_authoritative = false);
+void setup(player_state_t *p_player, std::map<uint32_t, player_state_t> *p_players);
 void destroy();
+void setIsAuthoritative(bool val = false);
 
 /**
  * @brief Begins an RTOS task, scanning for ESP-NOW connections
  * This is used to initialize the m_connected_players array.
  */
 void beginScan();
-
 void updateScan();
 
 /**

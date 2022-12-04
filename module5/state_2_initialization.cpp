@@ -56,6 +56,7 @@ void InitializationState::run() {
     while (!m_game->m_peripherals_client->checkButtonPressDuration(5000)) {
       m_game->m_peripherals_client->update();
     }
+    Client::ESPNOW::sendBroadcast(Client::ESPNOWEvent::EventType::BEGIN_GAME, 0);
     // if non-authoritative
   } else {
     // loop until seeker has been assigned

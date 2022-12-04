@@ -137,9 +137,8 @@ static void pm_scanTask(void *pvParameter) {
  *
  * Allocates the array for holding our connected player objects.
  */
-void ESPNOW::setup(player_state_t *p_player, std::map<uint32_t, player_state_t> *p_players, bool p_is_authoritative) {
+void ESPNOW::setup(player_state_t *p_player, std::map<uint32_t, player_state_t> *p_players) {
   // sync authoritative state
-  is_authoritative = p_is_authoritative;
   has_seeker = false;
   begin_game = false;
   has_rank = false;
@@ -169,6 +168,13 @@ void ESPNOW::setup(player_state_t *p_player, std::map<uint32_t, player_state_t> 
 void ESPNOW::destroy() {
   mesh.stop();
   ESPNOW::endScan();
+}
+
+/**
+ * @brief Sets if the ESP is authoritative
+ */
+void ESPNOW::setIsAuthoritative(bool val) {
+  is_authoritative = val;
 }
 
 /* -------------------------------------------------------------------------- */

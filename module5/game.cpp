@@ -24,7 +24,9 @@ namespace cs334 {
  */
 Game::Game() {
   // build our ESP and Peripherals clients, initializing both
-  Client::ESPNOW::setup(&m_player, &m_players, m_player.is_authoritative);
+  Client::ESPNOW::setup(&m_player, &m_players);
+  m_player.is_authoritative = Client::ESPNOW::getNodeId() == AUTHORITY_NODE;
+  Client::ESPNOW::setIsAuthoritative(m_player.is_authoritative);
   m_peripherals_client = new Client::Peripherals();
 
   // add all of the states in order to the m_states vector
@@ -52,6 +54,7 @@ Game::~Game() {
  */
 void Game::loop() {
   Serial.println("\n[GAME] Started!");
+  Serial.printf("[GAME] ESP is authority: %s\n", m_player.is_authoritative ? "TRUE" : "FALSE");
   for (const auto &state : m_states) {
     state->setup();
     state->run();
