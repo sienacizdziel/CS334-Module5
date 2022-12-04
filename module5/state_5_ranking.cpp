@@ -49,11 +49,13 @@ void RankingState::run() {
       n_players_with_health = 0;
       std::map<uint32_t, player_state_t>::iterator it;
       for (it = m_game->m_players.begin(); it != m_game->m_players.end(); it++) {
-        if (it->second.health != 1) n_players_with_health++;
-        // note we do the ranking logic here as well
-        if (it->second.health < winner_health) {
-          winner = it->first;
-          winner_health = it->second.health;
+        if (it->second.health != 1) {
+          n_players_with_health++;
+          // note we do the ranking logic here as well
+          if (it->second.health < winner_health) {
+            winner = it->first;
+            winner_health = it->second.health;
+          }
         }
       }
       // Serial.printf("[DEBUG] curr: %d, max: %d", n_players_with_health, m_game->m_players.size());
